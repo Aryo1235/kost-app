@@ -1,0 +1,22 @@
+# PostgreSQL untuk pengembangan dan tes lokal. Hanya terbuka di 127.0.0.1.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: kost
+      POSTGRES_PASSWORD: kost
+      POSTGRES_DB: kost_dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - kost-db-dev:/var/lib/postgresql/data
+      # Membuat kost_test saat volume pertama kali dibuat.
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kost -d kost_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  kost-db-dev:
