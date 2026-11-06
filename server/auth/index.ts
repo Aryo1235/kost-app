@@ -6,4 +6,5 @@ export const authService = new AuthService({ db });
 
 export { SESSION_COOKIE, sessionCookieOptions } from "./cookies";
 export { assertSameOrigin, isAllowedOrigin } from "./origin";
+export { requireAuthed } from "./guard";
 export type { AuthUser, SessionContext } from "./auth.service";

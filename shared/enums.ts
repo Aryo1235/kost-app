@@ -10,3 +10,7 @@ export const AUDIT_ACTIONS = [
   "VIEW_SENSITIVE",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+// Jenis file privat. Dipakai sebagai bagian kunci file (TECH-SPEC 7.1).
+export const FILE_KINDS = ["tenant", "ticket", "meter", "payment", "expense", "asset"] as const;
+export type FileKind = (typeof FILE_KINDS)[number];

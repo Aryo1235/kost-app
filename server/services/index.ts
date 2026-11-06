@@ -1,5 +1,8 @@
 import { authService } from "@/server/auth";
 import { db } from "@/server/db/client";
+import { env } from "@/server/env";
+import { storage } from "@/server/storage";
+import { FileService } from "./file.service";
 import { PropertyService } from "./property.service";
 import { UserService } from "./user.service";
 
@@ -7,4 +10,5 @@ import { UserService } from "./user.service";
 export const services = {
   property: new PropertyService({ db }),
   user: new UserService({ db, auth: authService }),
+  file: new FileService({ db, storage, secret: env.FILE_SIGNING_SECRET }),
 };
