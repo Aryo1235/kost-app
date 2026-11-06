@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "node --env-file-if-exists=.env ./node_modules/drizzle-kit/bin.cjs generate",
-    "db:migrate": "node --env-file-if-exists=.env ./node_modules/drizzle-kit/bin.cjs migrate"
+    "db:migrate": "node --env-file-if-exists=.env ./node_modules/drizzle-kit/bin.cjs migrate",
+    "create-owner": "node --env-file-if-exists=.env --import tsx scripts/create-owner.ts",
+    "reset-password": "node --env-file-if-exists=.env --import tsx scripts/reset-password.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

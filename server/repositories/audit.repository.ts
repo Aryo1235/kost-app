@@ -7,9 +7,9 @@ export type AuditRow = typeof auditLogs.$inferSelect;
 
 // Audit hanya punya insert dan list. Tidak ada ubah atau hapus (FR-AUD-04).
 export class AuditRepository extends BaseRepository {
+  // actor_id selalu dari scope (FR-AUD-02). Nilai dari input tidak dipakai.
   async insert(values: {
     propertyId: number | null;
-    actorId: number | null;
     entityType: string;
     entityId: string;
     action: AuditAction;
@@ -21,7 +21,7 @@ export class AuditRepository extends BaseRepository {
       .values(
         this.withOrg({
           propertyId: values.propertyId,
-          actorId: values.actorId,
+          actorId: this.scope.userId,
           entityType: values.entityType,
           entityId: values.entityId,
           action: values.action,

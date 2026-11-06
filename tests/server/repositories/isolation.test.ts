@@ -123,7 +123,6 @@ describe("AuditRepository: isolasi antar organisasi", () => {
     const audit = new AuditRepository(db, scopes(s).ownerA);
     await audit.insert({
       propertyId: s.propA1,
-      actorId: s.ownerA,
       entityType: "property",
       entityId: String(s.propA1),
       action: "CREATE",
@@ -145,7 +144,6 @@ describe("AuditRepository: isolasi antar organisasi", () => {
     // Field itu sengaja dikirim untuk membuktikan nilainya diabaikan.
     const input = {
       propertyId: null,
-      actorId: s.ownerA,
       entityType: "property",
       entityId: "1",
       action: "UPDATE" as const,

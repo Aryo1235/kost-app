@@ -62,6 +62,7 @@ const eslintConfig = defineConfig([
   },
   // 4) Klien db mentah hanya dipakai di server/db, repository, dan service (TECH-SPEC 3.1).
   // Tes boleh memakai db langsung untuk menyiapkan dan membersihkan data.
+  // server/auth boleh karena satu-satunya tempat query lintas organisasi (TECH-SPEC 3.1).
   // Memakai aturan inti no-restricted-imports agar tidak menimpa aturan 1-3 di atas.
   {
     files: ["**/*.ts", "**/*.tsx"],
@@ -69,6 +70,7 @@ const eslintConfig = defineConfig([
       "server/db/**",
       "server/repositories/**",
       "server/services/**",
+      "server/auth/**",
       "tests/**",
     ],
     rules: {

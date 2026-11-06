@@ -26,6 +26,8 @@ export default defineConfig({
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       FILE_SIGNING_SECRET: "test-only-secret-minimal-tiga-puluh-dua-karakter",
       STORAGE_DIR: "./.test-storage",
+      // Keluaran log menutupi hasil tes. Logger diuji langsung di unit.test.ts.
+      LOG_LEVEL: "silent",
     },
   },
 });
