@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "node --env-file-if-exists=.env ./node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "node --env-file-if-exists=.env ./node_modules/drizzle-kit/bin.cjs migrate"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
