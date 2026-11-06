@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# file privat lokal dan hasil tes
+/storage
+/.test-storage
 
 # vercel
 .vercel
