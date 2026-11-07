@@ -45,6 +45,8 @@ export type AuthUser = {
 export type SessionContext = {
   sessionId: number;
   user: AuthUser;
+  // Untuk tampilan (sidebar). Bukan dasar izin; izin hanya dari scope.
+  organizationName: string;
   scope: Scope;
 };
 
@@ -168,6 +170,7 @@ export class AuthService {
     return {
       sessionId: row.session.id,
       user,
+      organizationName: row.organizationName,
       scope: {
         organizationId: user.organizationId,
         userId: user.id,

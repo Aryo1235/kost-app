@@ -12,6 +12,7 @@ export const authRouter = router({
       username: user.username,
       role: user.role,
       organizationId: user.organizationId,
+      organizationName: ctx.session.organizationName,
       mustChangePassword: user.mustChangePassword,
       permissions: permissionsFor(user.role),
       // "ALL" untuk owner, daftar id properti untuk pengelola.

@@ -98,9 +98,10 @@ export class AuthRepository {
 
   async findSessionByTokenHash(tokenHash: string) {
     const [row] = await this.db
-      .select({ session: sessions, user: users })
+      .select({ session: sessions, user: users, organizationName: organizations.name })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
+      .innerJoin(organizations, eq(organizations.id, sessions.organizationId))
       .where(eq(sessions.tokenHash, tokenHash))
       .limit(1);
     return row ?? null;
