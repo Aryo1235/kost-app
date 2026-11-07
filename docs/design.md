@@ -1,6 +1,6 @@
 # Panduan Desain Kostra
 
-**Versi:** 0.4 · **Tanggal:** 7 November 2026
+**Versi:** 0.6 · **Tanggal:** 7 November 2026
 **Nama produk:** Kostra
 **Berlaku untuk:** seluruh aplikasi (login, area berlogin, ekspor PDF bila relevan)
 **Dibaca bersama:** `AGENTS.md`, `docs/PRD.md` (bagian 1, 2, 7, 8, 9), `docs/TECH-SPEC.md` (bagian 6)
@@ -25,6 +25,8 @@ Dokumen ini satu-satunya sumber warna, huruf, jarak, dan pola komponen. Agen pen
 | Kartu angka (0.3) | Dua kartu terpisah, ikon di pojok | **Strip angka**: satu panel bergaris dengan sel berpembagi, tanpa ikon (6.13) |
 | Halaman Akun (0.3) | Satu kolom sempit berisi formulir sandi | **Bagian bertingkat**: judul di kiri, isi di kanan. Ada bagian Profil (baca saja) dan Kata sandi (6.18) |
 | Kamar dan properti (0.4) | Belum diatur | **Daftar kamar** dengan kolom properti saat "Semua properti" (6.19). **Form kamar** halaman penuh (6.20). **Sakelar** dan pola listrik di pengaturan properti (6.20) |
+| Detail kamar (0.5) | Belum diatur | **Halaman detail kamar** baca saja: strip harga dan status, bagian data kamar, dan bagian lain yang muncul bertahap (6.21, 7.7). Ubah dan hapus pindah dari form ke halaman detail (6.20, 6.21) |
+| Keputusan M1 (0.6) | Pola listrik A sampai E, harga bisa 0, detail dan ubah kamar satu halaman | **Pola A sampai E saja** (BR-17). Keterangan pola ditulis dalam bahasa awam. **Harga harus lebih dari 0.** **Detail dan ubah kamar dipisah** (6.21). Lihat 11.1 |
 
 ---
 
@@ -568,15 +570,63 @@ Desktop (≥1024px)
 **Form kamar** memakai halaman penuh karena isiannya lebih dari 4 kolom (1.3). Isian berada di satu kartu: dua kolom di desktop, satu kolom di HP.
 - Urutan: Kode kamar (bantuan: unik di dalam properti, huruf besar dan kecil dianggap sama), Tipe kamar, Harga sewa per bulan (`MoneyInput`), Status, Fasilitas kamar, Catatan.
 - Status hanya Kosong dan Rusak yang bisa dipilih. Terisi tampil sebagai keterangan saja dan diatur otomatis saat ada penghuni (M2).
-- Tombol: "Batal" (garis) dan "Simpan kamar" atau "Simpan perubahan" (utama, satu per layar). "Hapus kamar" di kiri bawah, teks merah, lewat konfirmasi berat (6.9).
+- Tombol: "Batal" (garis) dan "Simpan kamar" atau "Simpan perubahan" (utama, satu per layar). Hapus kamar tidak ada di form. Aksi hapus ada di menu ⋯ halaman detail (6.21).
 
 **Pengaturan properti** tampil di dialog. Isian: nama, alamat, pola listrik, dan catatan (empat kolom, sesuai batas 6.8). Dua sakelar: "Ada fasum" dan "Listrik dikelola aplikasi".
 - Keterangan pola ditampilkan di bawah pilihan pola (teks dari `lib/labels.ts`, sesuai Lampiran C PRD).
-- Sakelar listrik tidak berubah sendiri saat pola diganti. Aturan "pola A tidak dikelola, B sampai E dikelola, Lainnya bebas" hanya ada di server. Kombinasi yang tidak cocok ditolak dengan galat "Pola listrik tidak sesuai dengan pengaturan listrik dikelola."
+- Sakelar listrik tidak berubah sendiri saat pola diganti. Aturan "pola A tidak dikelola aplikasi, B sampai E dikelola aplikasi" hanya ada di server. Kombinasi yang tidak cocok ditolak dengan galat "Pola listrik tidak sesuai dengan pengaturan listrik dikelola."
 - Nonaktifkan dan aktifkan properti memakai konfirmasi ringan (6.9): satu kalimat dampak, tombol nonaktifkan bergaris merah.
-- Daftar properti menampilkan lencana pengaturan: "Ada fasum" atau "Tanpa fasum", "Listrik dikelola" atau "Listrik tidak dikelola", pola ("Pola A" sampai "Lainnya"), dan "Nonaktif" bila berlaku. Lencana memakai nada `neutral`.
+- Daftar properti menampilkan lencana pengaturan: "Ada fasum" atau "Tanpa fasum", "Listrik dikelola" atau "Listrik tidak dikelola", pola ("Pola A" sampai "Pola E"), dan "Nonaktif" bila berlaku. Lencana memakai nada `neutral`.
 
 **Sakelar** (`Switch`, dari paket `radix-ui` yang sudah ada): trek 40×24, tertutup `--input`, terbuka `--primary`, bulatan `--card`. Di HP, seluruh baris berlabel menjadi area sentuh minimal 44px.
+
+---
+
+### 6.21 Halaman detail kamar (`/kamar/[id]`)
+
+Disetujui (versi 0.6, lihat 11.1). Polanya sama dengan detail tenant (7.3): halaman baca, dengan tombol ubah dan menu aksi di header. Di M1 halaman ini hanya memuat data kamar. Bagian lain muncul di milestone masing-masing.
+
+**Header** (5.4):
+- Judul h1 "Kamar A-07". Keterangan satu baris berisi nama properti, misalnya "Properti Melati". Judul tanpa lencana, karena status sudah ada di strip.
+- Aksi: "Ubah data" (tombol garis, menuju `/kamar/[id]/ubah`) dan menu ⋯ (ikon, 32px desktop, 44px HP, `aria-label` "Aksi kamar").
+- Menu ⋯ hanya berisi "Hapus kamar" dengan teks merah.
+- Tidak ada tombol utama di halaman ini.
+
+**Strip angka** (6.13), di bawah header:
+- Di M1 dua sel:
+  - "Harga sewa per bulan": nilai rupiah, keterangan "Harga dasar kamar".
+  - "Status": nilai berupa lencana status (6.7), bukan angka. Keterangan "Diatur di form ubah" untuk Kosong dan Rusak, dan "Diatur otomatis" untuk Terisi.
+- Sel baru ditambahkan saat fiturnya ada: "Penyewa" (M2). Bila data belum ada, tampilkan "–".
+
+**Bagian** (6.18, judul di kiri, panel di kanan), urutannya tetap:
+1. **Data kamar** (M1). Baris label-nilai: Tipe kamar, Fasilitas kamar, Catatan. Kosong ditulis "–". Kode dan harga tidak diulang karena sudah ada di judul dan strip.
+2. **Penyewa aktif** (M2, FR-ROOM-07). Nama, kontak, tanggal masuk, dan tautan ke detail tenant (7.3). Kamar kosong cukup satu kalimat, misalnya "Kamar ini sedang kosong.", tanpa tombol.
+3. **Riwayat meteran** (M4). Hanya tampil bila listrik properti dikelola (BR-16, FR-PRO-05). Berisi meteran yang melayani kamar dan angka terakhir.
+4. **Asset kamar** dan **Tiket maintenance** (M5). Baris bergaris. Setiap asset menampilkan kondisi (6.7), setiap tiket menampilkan statusnya (6.7).
+
+Aturan bagian:
+- Bagian yang fiturnya belum ada tidak ditampilkan, tanpa kerangka kosong (1.2, tidak ada teks pengisi).
+- Bagian baca saja tidak punya tombol simpan (6.18).
+- Bagian tanpa data memakai satu kalimat (6.11) dan paling banyak satu tombol.
+
+**Hapus kamar** (6.9, tingkat berat):
+- Dialog berjudul "Hapus kamar A-07?". Dampak: "Kamar hilang dari daftar. Kodenya bisa dipakai lagi nanti." Tombol merah solid. Fokus awal ke "Batal".
+- Bila kamar masih punya penyewa aktif (M2 ke atas), dialog diblokir: tampilkan "Kamar masih ditempati {nama penyewa}. Keluarkan penyewa dulu." dan tanpa tombol konfirmasi (FR-ROOM-06).
+
+**Keadaan**:
+- Memuat: kerangka (6.12) berbentuk strip dan dua baris bagian.
+- Kamar tidak ditemukan (galat ROOM_NOT_FOUND): judul "Kamar tidak ditemukan" dan tombol "Kembali ke daftar" (garis).
+- Galat lain: kotak galat dengan "Coba lagi" (6.6).
+
+**Navigasi**: breadcrumb navbar `Beranda / Kamar`, sama seperti halaman kamar lain (5.3). Breadcrumb dibentuk dari alamat halaman dan tidak mengambil data, jadi kode kamar tampil di judul halaman, bukan di breadcrumb. Di HP hanya "Kamar".
+
+**Halaman ubah** (`/kamar/[id]/ubah`), memakai form 6.20:
+- Judul "Ubah kamar A-07", keterangan nama properti.
+- Tombol "Batal" (garis, kembali ke detail) dan "Simpan perubahan" (utama, satu-satunya di halaman).
+- Setelah disimpan, kembali ke halaman detail dengan data terbaru.
+- Breadcrumb `Beranda / Kamar / A-07 / Ubah`.
+
+**Tambah kamar**: setelah disimpan, pindah ke halaman detail kamar baru.
 
 ---
 
@@ -649,6 +699,33 @@ Desktop: tabel dengan isian angka langsung, simpan per baris dengan Enter. HP: d
 ### 7.6 Login
 
 Lihat 6.17.
+
+---
+
+### 7.7 Detail kamar
+
+Desktop:
+```
+[≡] │ Beranda / Kamar / A-07                                        [Melati ▾]
+──────────────────────────────────────────────────────────────────────────────
+A-07                                                     [Ubah data]    ⋯
+Properti Melati
+┌──────────────────────────────┬──────────────────────────────┐
+│ Harga sewa per bulan         │ Status                       │
+│ Rp 1.250.000                 │ [Rusak]                      │
+│ Harga dasar kamar            │ Diatur di form ubah          │
+└──────────────────────────────┴──────────────────────────────┘
+
+Data kamar                     ┌──────────────────────────────────────────┐
+Diisi di form ubah.            │ Tipe kamar     AC                        │
+                               │ Fasilitas      Kipas angin, kamar mandi  │
+                               │ Catatan        –                         │
+                               └──────────────────────────────────────────┘
+
+(Penyewa aktif, riwayat meteran, asset dan tiket tampil di sini saat fiturnya ada.)
+```
+
+HP: judul dan aksi di dua baris, strip bertumpuk (divide-y), bagian satu kolom, label di atas nilai.
 
 ---
 
@@ -775,6 +852,10 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 | Foto login | Foto bebas pakai berlisensi (CC0), dengan kredit, sebagai stand-in sampai ada foto kost sendiri |
 | Form kamar (0.4) | Halaman penuh, bukan dialog, karena lebih dari 4 kolom (1.3) |
 | Sakelar (0.4) | Komponen `Switch` dari `radix-ui` yang sudah terpasang. Tidak ada paket baru |
+| Pola listrik fase 1 (0.6) | Hanya pola A sampai E (Lampiran C, BR-17). Pilihan "Lainnya" dihapus. Data lama dengan pola CUSTOM tampil, tetapi harus dipilih ulang |
+| Keterangan pola (0.6) | Ditulis dalam bahasa awam, satu kalimat per pola: siapa yang membayar PLN dan apakah ditagihkan ke penyewa (6.20) |
+| Harga sewa (0.6) | Harus lebih dari 0, sesuai 6.4. Harga 0 ditolak |
+| Detail dan ubah kamar (0.6) | Dipisah: `/kamar/[id]` untuk baca, `/kamar/[id]/ubah` untuk form. Hapus kamar di menu ⋯ halaman detail (6.21) |
 
 ### 11.2 Masih terbuka
 
@@ -782,4 +863,3 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 2. **Istilah baku:** "Tenant" atau "Penghuni", "Owner" atau "Pemilik".
 3. **Huruf ekspor PDF:** TECH-SPEC 7.4 menyebut Inter. Agar seragam, sebaiknya Plus Jakarta Sans. Perubahan ini di TECH-SPEC, bukan di sini.
 4. **Foto kost sendiri** untuk menggantikan foto stand-in di login (kamar, jendela, atau bangunan, orientasi potret).
-5. **Harga sewa nol** (0.4): 6.4 menulis "Nominal harus lebih dari 0", tetapi skema dan tes M1 menerima 0 (bilangan bulat, tidak negatif). Perlu diputuskan: boleh gratis atau tidak.
