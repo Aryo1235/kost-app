@@ -18,3 +18,9 @@ export function greetingWIB(date: Date = new Date()): string {
   if (hour >= 15 && hour < 18) return "Selamat sore";
   return "Selamat malam";
 }
+
+// Rupiah bulat dengan titik ribuan: "Rp 1.250.000". Spasi setelah Rp tidak terputus (design.md 8.2).
+export function formatRupiah(amount: number): string {
+  const whole = Math.trunc(Math.abs(amount)).toLocaleString("id-ID");
+  return `${amount < 0 ? "-" : ""}Rp ${whole}`;
+}
