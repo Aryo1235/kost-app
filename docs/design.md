@@ -1,6 +1,6 @@
 # Panduan Desain Kostra
 
-**Versi:** 0.2 · **Tanggal:** 6 November 2026
+**Versi:** 0.4 · **Tanggal:** 7 November 2026
 **Nama produk:** Kostra
 **Berlaku untuk:** seluruh aplikasi (login, area berlogin, ekspor PDF bila relevan)
 **Dibaca bersama:** `AGENTS.md`, `docs/PRD.md` (bagian 1, 2, 7, 8, 9), `docs/TECH-SPEC.md` (bagian 6)
@@ -24,6 +24,7 @@ Dokumen ini satu-satunya sumber warna, huruf, jarak, dan pola komponen. Agen pen
 | Kartu angka | Kotak polos | Pola `section-cards` shadcn, tanpa gradasi dan bayangan |
 | Kartu angka (0.3) | Dua kartu terpisah, ikon di pojok | **Strip angka**: satu panel bergaris dengan sel berpembagi, tanpa ikon (6.13) |
 | Halaman Akun (0.3) | Satu kolom sempit berisi formulir sandi | **Bagian bertingkat**: judul di kiri, isi di kanan. Ada bagian Profil (baca saja) dan Kata sandi (6.18) |
+| Kamar dan properti (0.4) | Belum diatur | **Daftar kamar** dengan kolom properti saat "Semua properti" (6.19). **Form kamar** halaman penuh (6.20). **Sakelar** dan pola listrik di pengaturan properti (6.20) |
 
 ---
 
@@ -554,6 +555,31 @@ Desktop (≥1024px)
 
 ---
 
+### 6.19 Daftar kamar (`/kamar`)
+
+- Judul "Kamar". Keterangan memuat nama properti yang dipilih di navbar, atau "Semua properti". Tombol "Tambah kamar" (utama) hanya tampil saat satu properti dipilih.
+- Bar filter (5.5): kolom "Cari kode kamar…", pilihan status "Semua status / Kosong / Terisi / Rusak", dan "Hapus filter" (hantu) saat ada filter. Cari, status, dan halaman disimpan di URL (`q`, `status`, `page`) dan dijalankan di server.
+- Kolom tabel: Kode (tautan ke halaman kamar), Properti (hanya saat "Semua properti"), Tipe (kosong ditulis "—"), Harga sewa (rata kanan, `tabular-nums`), Status (`StatusBadge`).
+- HP: satu kartu per kamar. Baris pertama kode dan status, baris kedua tipe (dan properti bila perlu), baris ketiga harga dengan "/ bulan". Tidak ada gulir samping.
+- Kosong: "Belum ada kamar" dengan satu kalimat. Hasil filter kosong: "Tidak ada data yang cocok" dengan tombol "Hapus filter".
+
+### 6.20 Form kamar dan pengaturan properti
+
+**Form kamar** memakai halaman penuh karena isiannya lebih dari 4 kolom (1.3). Isian berada di satu kartu: dua kolom di desktop, satu kolom di HP.
+- Urutan: Kode kamar (bantuan: unik di dalam properti, huruf besar dan kecil dianggap sama), Tipe kamar, Harga sewa per bulan (`MoneyInput`), Status, Fasilitas kamar, Catatan.
+- Status hanya Kosong dan Rusak yang bisa dipilih. Terisi tampil sebagai keterangan saja dan diatur otomatis saat ada penghuni (M2).
+- Tombol: "Batal" (garis) dan "Simpan kamar" atau "Simpan perubahan" (utama, satu per layar). "Hapus kamar" di kiri bawah, teks merah, lewat konfirmasi berat (6.9).
+
+**Pengaturan properti** tampil di dialog. Isian: nama, alamat, pola listrik, dan catatan (empat kolom, sesuai batas 6.8). Dua sakelar: "Ada fasum" dan "Listrik dikelola aplikasi".
+- Keterangan pola ditampilkan di bawah pilihan pola (teks dari `lib/labels.ts`, sesuai Lampiran C PRD).
+- Sakelar listrik tidak berubah sendiri saat pola diganti. Aturan "pola A tidak dikelola, B sampai E dikelola, Lainnya bebas" hanya ada di server. Kombinasi yang tidak cocok ditolak dengan galat "Pola listrik tidak sesuai dengan pengaturan listrik dikelola."
+- Nonaktifkan dan aktifkan properti memakai konfirmasi ringan (6.9): satu kalimat dampak, tombol nonaktifkan bergaris merah.
+- Daftar properti menampilkan lencana pengaturan: "Ada fasum" atau "Tanpa fasum", "Listrik dikelola" atau "Listrik tidak dikelola", pola ("Pola A" sampai "Lainnya"), dan "Nonaktif" bila berlaku. Lencana memakai nada `neutral`.
+
+**Sakelar** (`Switch`, dari paket `radix-ui` yang sudah ada): trek 40×24, tertutup `--input`, terbuka `--primary`, bulatan `--card`. Di HP, seluruh baris berlabel menjadi area sentuh minimal 44px.
+
+---
+
 ## 7. Sketsa Teks Layar
 
 Semua layar memakai kerangka bagian 5 (sidebar + navbar di desktop, laci di HP). Sketsa hanya menggambar isi panel inset.
@@ -747,6 +773,8 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 | Navigasi HP | Laci sidebar saja, tanpa bilah bawah |
 | Huruf | Plus Jakarta Sans |
 | Foto login | Foto bebas pakai berlisensi (CC0), dengan kredit, sebagai stand-in sampai ada foto kost sendiri |
+| Form kamar (0.4) | Halaman penuh, bukan dialog, karena lebih dari 4 kolom (1.3) |
+| Sakelar (0.4) | Komponen `Switch` dari `radix-ui` yang sudah terpasang. Tidak ada paket baru |
 
 ### 11.2 Masih terbuka
 
@@ -754,3 +782,4 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 2. **Istilah baku:** "Tenant" atau "Penghuni", "Owner" atau "Pemilik".
 3. **Huruf ekspor PDF:** TECH-SPEC 7.4 menyebut Inter. Agar seragam, sebaiknya Plus Jakarta Sans. Perubahan ini di TECH-SPEC, bukan di sini.
 4. **Foto kost sendiri** untuk menggantikan foto stand-in di login (kamar, jendela, atau bangunan, orientasi potret).
+5. **Harga sewa nol** (0.4): 6.4 menulis "Nominal harus lebih dari 0", tetapi skema dan tes M1 menerima 0 (bilangan bulat, tidak negatif). Perlu diputuskan: boleh gratis atau tidak.
