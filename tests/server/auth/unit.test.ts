@@ -1,6 +1,7 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
+import { clientIp } from "@/server/auth/client-ip";
 import { isAllowedOrigin } from "@/server/auth/origin";
 import {
   hashPassword,
@@ -61,6 +62,28 @@ describe("sesi", () => {
     expect(hashToken(token)).toMatch(/^[0-9a-f]{64}$/);
     expect(hashToken(token)).not.toBe(token);
     expect(hashToken(token)).toBe(hashToken(token));
+  });
+});
+
+describe("alamat klien untuk pembatasan percobaan", () => {
+  const withXff = (value?: string) =>
+    new Request("http://localhost:3000/api/auth/login", {
+      headers: value === undefined ? {} : { "x-forwarded-for": value },
+    });
+
+  it("memakai entri paling kanan, bukan yang dikirim klien", () => {
+    expect(clientIp(withXff("1.2.3.4, 203.0.113.9"))).toBe("203.0.113.9");
+  });
+
+  it("tanpa header, atau nilai yang bukan IP, menghasilkan null", () => {
+    expect(clientIp(withXff())).toBeNull();
+    expect(clientIp(withXff("bukan-ip"))).toBeNull();
+    expect(clientIp(withXff("1.2.3.4; drop table"))).toBeNull();
+  });
+
+  it("IPv4 dan IPv6 diterima", () => {
+    expect(clientIp(withXff("2001:db8::1"))).toBe("2001:db8::1");
+    expect(clientIp(withXff("198.51.100.7"))).toBe("198.51.100.7");
   });
 });
 

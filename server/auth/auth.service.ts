@@ -278,6 +278,9 @@ export class AuthService {
     password: string;
   }): Promise<{ organizationId: number; userId: number }> {
     const username = normalizeUsername(input.username);
+    if (input.password.toLowerCase() === username) {
+      throw new BusinessRuleError("PASSWORD_SAME_AS_USERNAME");
+    }
     const repo = new AuthRepository(this.deps.db);
     if (await repo.findUserByUsername(username)) {
       throw new ConflictError("USERNAME_TAKEN");

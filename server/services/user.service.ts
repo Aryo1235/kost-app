@@ -2,7 +2,7 @@ import type { AuthService } from "@/server/auth/auth.service";
 import { AuthRepository } from "@/server/auth/auth.repository";
 import { hashPassword } from "@/server/auth/password";
 import type { Db } from "@/server/db/client";
-import { ConflictError, ForbiddenError, NotFoundError } from "@/server/errors";
+import { BusinessRuleError, ConflictError, ForbiddenError, NotFoundError } from "@/server/errors";
 import { PropertyRepository } from "@/server/repositories/property.repository";
 import { UserRepository, type UserRow } from "@/server/repositories/user.repository";
 import type { Scope } from "@/server/scope";
@@ -39,6 +39,9 @@ export class UserService {
   async create(scope: Scope, input: CreateUserInput) {
     requireOwner(scope);
     const username = input.username;
+    if (input.password.toLowerCase() === username) {
+      throw new BusinessRuleError("PASSWORD_SAME_AS_USERNAME");
+    }
 
     // Username unik di seluruh sistem (TECH-SPEC 3.4).
     if (await new AuthRepository(this.deps.db).findUserByUsername(username)) {

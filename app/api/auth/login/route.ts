@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   assertSameOrigin,
   authService,
+  clientIp,
   sessionCookieOptions,
   SESSION_COOKIE,
 } from "@/server/auth";
@@ -13,11 +14,10 @@ export async function POST(request: NextRequest) {
   try {
     assertSameOrigin(request);
     const body = loginInput.parse(await request.json());
-    const forwarded = request.headers.get("x-forwarded-for");
     const result = await authService.login({
       username: body.username,
       password: body.password,
-      ip: forwarded?.split(",")[0]?.trim() || null,
+      ip: clientIp(request),
     });
 
     const res = NextResponse.json({

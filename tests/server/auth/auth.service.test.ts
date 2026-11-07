@@ -324,6 +324,14 @@ describe("pembuatan owner (skrip create-owner)", () => {
     expect(JSON.stringify(audit)).not.toContain(PASSWORD);
   });
 
+  it("kata sandi yang sama dengan username ditolak", async () => {
+    expect(
+      await codeOf(
+        svc().createOwner({ organizationName: "A", name: "A", username: "budi.owner", password: "BUDI.OWNER" }),
+      ),
+    ).toEqual({ code: "PASSWORD_SAME_AS_USERNAME", status: 422 });
+  });
+
   it("username yang sudah dipakai ditolak", async () => {
     await svc().createOwner({ organizationName: "A", name: "A", username: "budi.owner", password: PASSWORD });
     expect(

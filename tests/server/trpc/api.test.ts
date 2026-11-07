@@ -203,6 +203,15 @@ describe("kelola pengelola oleh owner", () => {
     expect(audit.some((a) => a.action === "CREATE" && a.entityType === "user")).toBe(true);
   });
 
+  it("sandi awal pengelola sama dengan username ditolak", async () => {
+    const { ctx } = await sessionFor("owner.a");
+    expect(
+      await errOf(
+        caller(ctx).user.create({ name: "X", username: "pengelola.sama", password: "pengelola.sama", propertyIds: [] }),
+      ),
+    ).toMatchObject({ code: "PRECONDITION_FAILED", message: "PASSWORD_SAME_AS_USERNAME" });
+  });
+
   it("username yang sudah dipakai ditolak CONFLICT", async () => {
     const { ctx } = await sessionFor("owner.a");
     expect(
