@@ -3,28 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useState } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { FormField } from "@/components/shared/form-field";
 import { MoneyInput } from "@/components/shared/money-input";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { codeFromError, errorMessage, fieldErrorMessage } from "@/lib/errors";
 import { ROOM_STATUS_LABELS } from "@/lib/labels";
-import { useCreateRoom, useRemoveRoom, useUpdateRoom } from "@/lib/room/hooks";
+import { useCreateRoom, useUpdateRoom } from "@/lib/room/hooks";
 import type { RoomDetail } from "@/lib/room/types";
 import type { RoomStatus } from "@/shared/enums";
 import { createRoomInput } from "@/shared/schemas/room";
@@ -55,14 +44,14 @@ export function RoomCreateForm({ propertyId }: { propertyId: number }) {
 
   async function onSubmit(values: RoomFormInput) {
     try {
-      await create.mutateAsync({
+      const created = await create.mutateAsync({
         propertyId,
         ...values,
         roomType: values.roomType || undefined,
         facilities: values.facilities || undefined,
         notes: values.notes || undefined,
       });
-      router.push("/kamar");
+      router.push(`/kamar/${created.id}`);
     } catch {
       // Galat ditampilkan di bawah lewat create.error.
     }
@@ -76,6 +65,7 @@ export function RoomCreateForm({ propertyId }: { propertyId: number }) {
       failure={create.error}
       statuses={["AVAILABLE", "BROKEN"]}
       submitLabel="Simpan kamar"
+      cancelHref="/kamar"
     />
   );
 }
@@ -92,7 +82,7 @@ export function RoomEditForm({ room }: { room: RoomDetail }) {
   async function onSubmit(values: RoomFormInput) {
     try {
       await update.mutateAsync({ roomId: room.id, ...values });
-      router.push("/kamar");
+      router.push(`/kamar/${room.id}`);
     } catch {
       // Galat ditampilkan di bawah lewat update.error.
     }
@@ -110,7 +100,7 @@ export function RoomEditForm({ room }: { room: RoomDetail }) {
       failure={update.error}
       statuses={statuses}
       submitLabel="Simpan perubahan"
-      footerStart={<RemoveRoomDialog room={room} />}
+      cancelHref={`/kamar/${room.id}`}
     />
   );
 }
@@ -122,7 +112,7 @@ function RoomFormShell({
   failure,
   statuses,
   submitLabel,
-  footerStart,
+  cancelHref,
 }: {
   form: UseFormReturn<RoomFormInput>;
   onSubmit: (values: RoomFormInput) => Promise<void>;
@@ -130,7 +120,7 @@ function RoomFormShell({
   failure: unknown;
   statuses: RoomStatus[];
   submitLabel: string;
-  footerStart?: ReactNode;
+  cancelHref: string;
 }) {
   const { register, control, handleSubmit, formState } = form;
   const { errors } = formState;
@@ -211,69 +201,14 @@ function RoomFormShell({
         </p>
       ) : null}
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>{footerStart}</div>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row">
-          <Button variant="outline" asChild className="w-full sm:w-auto">
-            <Link href="/kamar">Batal</Link>
-          </Button>
-          <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-            {pending ? "Menyimpan…" : submitLabel}
-          </Button>
-        </div>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="outline" asChild className="w-full sm:w-auto">
+          <Link href={cancelHref}>Batal</Link>
+        </Button>
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+          {pending ? "Menyimpan…" : submitLabel}
+        </Button>
       </div>
     </form>
-  );
-}
-
-function RemoveRoomDialog({ room }: { room: RoomDetail }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const remove = useRemoveRoom();
-
-  async function onConfirm() {
-    try {
-      await remove.mutateAsync({ roomId: room.id });
-      router.push("/kamar");
-    } catch {
-      // Galat ditampilkan di bawah lewat remove.error.
-    }
-  }
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) remove.reset();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline" className="w-full !text-danger sm:w-auto">
-          Hapus kamar
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Hapus kamar {room.code}?</DialogTitle>
-          <DialogDescription>Kamar hilang dari daftar. Kodenya bisa dipakai lagi nanti.</DialogDescription>
-        </DialogHeader>
-        {remove.isError ? (
-          <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
-            {errorMessage(codeFromError(remove.error))}
-          </p>
-        ) : null}
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Batal
-            </Button>
-          </DialogClose>
-          <Button type="button" variant="destructive" onClick={onConfirm} disabled={remove.isPending}>
-            {remove.isPending ? "Menghapus…" : "Hapus kamar"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
