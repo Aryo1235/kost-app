@@ -36,6 +36,14 @@ export function errorMessage(code: string | null | undefined): string {
   return MESSAGES[code] ?? FALLBACK;
 }
 
+// Galat satu kolom form: kode dari skema dipetakan, pesan bawaan Zod diganti kalimat umum.
+const FIELD_FALLBACK = "Isian ini belum benar.";
+
+export function fieldErrorMessage(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined;
+  return MESSAGES[raw] ?? FIELD_FALLBACK;
+}
+
 // Mengambil kode domain dari galat tRPC (data.domainCode) atau dari respons route biasa (code).
 export function codeFromError(err: unknown): string | null {
   if (typeof err !== "object" || err === null) return null;
