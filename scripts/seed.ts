@@ -1,7 +1,8 @@
 import { seedDevData } from "@/server/db/seed";
 
 // yarn db:seed: data contoh untuk pengembangan. Menghapus data di database dev lebih dulu.
-seedDevData()
+// Opsi: --besar menambah properti dengan 300 kamar untuk menguji kecepatan daftar.
+seedDevData({ large: process.argv.includes("--besar") })
   .then((summary) => {
     console.log("Data contoh dibuat. Akun untuk pengujian lokal:");
     for (const a of summary.accounts) {
