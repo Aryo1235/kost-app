@@ -9,6 +9,7 @@ import { logout } from "@/lib/auth/actions";
 import { codeFromError } from "@/lib/errors";
 import { useMe } from "@/lib/hooks/useMe";
 import { AppSidebar } from "./app-sidebar";
+import { PropertySwitcher } from "./property-switcher";
 import { SiteHeader } from "./site-header";
 
 // Kerangka area berlogin: sidebar inset + navbar + isi (shadcn dashboard-01, design.md 5.1).
@@ -61,7 +62,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </a>
       <AppSidebar me={me.data} onLogout={onLogout} />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader>
+          <PropertySwitcher me={me.data} />
+        </SiteHeader>
         <main id="konten" className="flex flex-1 flex-col">
           <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-4 py-6 lg:px-6 lg:py-8">
             {children}
