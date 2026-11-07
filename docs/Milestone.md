@@ -14,7 +14,7 @@ Letakkan di `docs/MILESTONES.md`. Berkas ini adalah daftar kerja dan kumpulan pr
 | Urut | Tahap  | Isi                                                                                                                     | Selesai |
 | ---- | ------ | ----------------------------------------------------------------------------------------------------------------------- | ------- |
 | 1    | **M0** | Fondasi: login, peran, isolasi data, audit log, file privat                                                             | [ ]     |
-| 2    | **M1** | Properti dan kamar                                                                                                      | [ ]     |
+| 2    | **M1** | Properti dan kamar                                                                                                      | [x]     |
 | 3    | **M2** | Tenant                                                                                                                  | [ ]     |
 | 4    | **M3** | Tagihan, pembayaran, pengingat WhatsApp, tenant keluar                                                                  | [ ]     |
 | 5    | **M5** | Asset dan maintenance                                                                                                   | [ ]     |

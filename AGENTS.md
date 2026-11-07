@@ -112,4 +112,4 @@ Alur satu arah: controller → service → repository. Service melempar `NotFoun
 
 ## Status
 
-Milestone berjalan: **M1** (properti dan kamar). Kode dan tes selesai (146 tes lolos, lint dan typecheck lolos). Verifikasi HTTP (25 pemeriksaan), alur form di peramban, dan tangkapan layar 1440 dan 390 lolos di database verifikasi. Belum: uji di HP dan desktop oleh pemilik, dan penggabungan ke `main`. M0 selesai (tinjauan keamanan dan uji login sudah dilakukan). Perbarui baris ini di akhir tiap milestone.
+Milestone terakhir selesai: **M1** (properti dan kamar). Kode dan tes selesai (155 tes lolos, lint dan typecheck lolos), uji HTTP dan peramban, dan uji pemilik di HP dan desktop sudah dilakukan. Sudah digabung ke `main`. Milestone berikutnya: **M2** (tenant), menunggu rencana dan persetujuan. M0 selesai (tinjauan keamanan dan uji login sudah dilakukan). Perbarui baris ini di akhir tiap milestone.
