@@ -1,4 +1,4 @@
-import { eq, inArray, type SQL } from "drizzle-orm";
+import { eq, inArray, isNull, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { Db } from "@/server/db/client";
 import type { Scope } from "@/server/scope";
@@ -17,6 +17,11 @@ export abstract class BaseRepository {
   // Filter organisasi dari scope. Dipakai di setiap query baca, ubah, dan hapus.
   protected orgWhere(column: AnyPgColumn): SQL {
     return eq(column, this.scope.organizationId);
+  }
+
+  // Data yang sudah dihapus (soft delete, BR-14) tidak ikut dibaca.
+  protected notDeleted(deletedAt: AnyPgColumn): SQL {
+    return isNull(deletedAt);
   }
 
   // Manajer hanya ke properti yang ditugaskan. Owner tanpa batas properti.
