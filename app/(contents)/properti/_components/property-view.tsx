@@ -1,6 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2 } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-header";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -29,31 +31,43 @@ export function PropertyView() {
   const properties = useProperties();
   const canManage = me.data?.permissions.manageProperties === true;
 
+  const count = properties.data?.length;
+
   return (
-    <section>
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Properti</h1>
-        {canManage ? <AddPropertyDialog /> : null}
-      </div>
+    <section className="flex flex-col gap-6">
+      <PageHeader
+        title="Properti"
+        description={count === undefined ? "Memuat…" : `${count} properti`}
+        actions={canManage ? <AddPropertyDialog /> : null}
+      />
 
       {properties.isPending ? (
-        <p className="mt-6 text-sm text-muted-foreground" role="status">
+        <p className="text-sm text-muted-foreground" role="status">
           Memuat…
         </p>
       ) : properties.isError ? (
-        <p role="alert" className="mt-6 rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
+        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
           {errorMessage(codeFromError(properties.error))}
         </p>
       ) : properties.data.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          {canManage ? "Belum ada properti. Tambahkan properti pertama Anda." : "Belum ada properti yang bisa Anda akses."}
-        </p>
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-6 py-12 text-center">
+          <Building2 aria-hidden className="size-8 text-muted-foreground" strokeWidth={1.5} />
+          <p className="text-base font-semibold">Belum ada properti</p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            {canManage
+              ? "Tambahkan properti pertama Anda untuk mulai mencatat kamar dan tenant."
+              : "Belum ada properti yang ditugaskan kepada Anda. Hubungi owner."}
+          </p>
+        </div>
       ) : (
-        <ul className="mt-6 divide-y divide-border rounded-md border border-border bg-card">
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
           {properties.data.map((p) => (
-            <li key={p.id} className="px-4 py-3">
-              <p className="font-medium">{p.name}</p>
-              <p className="text-sm text-muted-foreground">{p.address}</p>
+            <li key={p.id} className="flex items-center gap-4 px-6 py-4">
+              <Building2 aria-hidden className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{p.name}</p>
+                <p className="truncate text-sm text-muted-foreground">{p.address}</p>
+              </div>
             </li>
           ))}
         </ul>

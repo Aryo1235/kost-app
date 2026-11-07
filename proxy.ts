@@ -15,6 +15,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Rute API dan aset statis tidak lewat proxy.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // Rute API, aset Next, dan file statis di public/ (apa pun yang berekstensi, mis. /images/x.webp)
+  // tidak lewat proxy. Tanpa ini foto halaman login ikut dialihkan ke /login.
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

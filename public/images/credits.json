@@ -1,0 +1,20 @@
+{
+ "note": "Credits for the photographs in this folder: photos.mjs credits prints the footer block for the ones the pages use.",
+ "photos": [
+  {
+   "file": "photo-m61880133.webp",
+   "files": [
+    "photo-m61880133-500.webp",
+    "photo-m61880133-960.webp",
+    "photo-m61880133.webp"
+   ],
+   "id": "m61880133",
+   "alt": "Cushions on a window seat under a white blind, a small lamp on the sill",
+   "by": "Irene van der Poel",
+   "licence": "CC0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "page": "https://commons.wikimedia.org/wiki/File:Cozy_bed_by_a_windowsill_(Unsplash).jpg",
+   "source": "Wikimedia Commons"
+  }
+ ]
+}

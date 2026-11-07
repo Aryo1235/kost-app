@@ -1,20 +1,18 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, LayoutDashboard, LogOut, Users, UserCog } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { logout } from "@/lib/auth/actions";
 import { codeFromError } from "@/lib/errors";
 import { useMe } from "@/lib/hooks/useMe";
-import { ROLE_LABELS } from "@/lib/labels";
-import { cn } from "@/lib/utils";
+import { AppSidebar } from "./app-sidebar";
+import { SiteHeader } from "./site-header";
 
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; show: boolean };
-
-// Kerangka aplikasi: sidebar di desktop (1024px ke atas), bilah bawah di HP dan tablet (design.md 5).
+// Kerangka area berlogin: sidebar inset + navbar + isi (shadcn dashboard-01, design.md 5.1).
+// Penjaga sesi di sini hanya untuk pengalihan tampilan. Izin sebenarnya di backend.
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,15 +40,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  const user = me.data;
-  const items: NavItem[] = [
-    { href: "/dashboard", label: "Beranda", icon: LayoutDashboard, show: true },
-    { href: "/properti", label: "Properti", icon: Building2, show: true },
-    { href: "/pengguna", label: "Pengguna", icon: Users, show: user.permissions.manageUsers },
-    { href: "/akun", label: "Akun", icon: UserCog, show: true },
-  ];
-  const visible = items.filter((item) => item.show);
-
   async function onLogout() {
     await logout();
     queryClient.clear();
@@ -59,76 +48,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      <aside className="fixed inset-y-0 left-0 hidden w-[232px] flex-col border-r border-sidebar-border bg-sidebar px-3 py-4 lg:flex">
-        <div className="px-2 pb-4">
-          <p className="text-base font-semibold tracking-tight">Kost</p>
-          <p className="mt-3 text-sm text-muted-foreground">{user.name}</p>
-          <p className="text-xs text-muted-foreground">{ROLE_LABELS[user.role]}</p>
-        </div>
-        <nav aria-label="Menu utama" className="flex flex-1 flex-col gap-1">
-          {visible.map((item) => (
-            <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
-          ))}
-        </nav>
-        <Button variant="ghost" className="justify-start" onClick={onLogout}>
-          <LogOut aria-hidden />
-          Keluar
-        </Button>
-      </aside>
-
-      <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
-        <p className="text-base font-semibold tracking-tight">Kost</p>
-        <p className="text-sm text-muted-foreground">{user.name}</p>
-      </header>
-
-      <main className="mx-auto w-full max-w-[1200px] px-4 py-6 pb-24 md:px-6 lg:py-8 lg:pl-[calc(232px+2rem)] lg:pr-8">
-        {children}
-      </main>
-
-      <nav
-        aria-label="Menu bawah"
-        className="fixed inset-x-0 bottom-0 z-10 grid border-t border-border bg-card pb-[env(safe-area-inset-bottom)] lg:hidden"
-        style={{ gridTemplateColumns: `repeat(${Math.min(visible.length, 4)}, minmax(0, 1fr))` }}
-      >
-        {visible.slice(0, 4).map((item) => {
-          const active = pathname.startsWith(item.href);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex h-14 flex-col items-center justify-center gap-0.5 text-xs",
-                active ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              <Icon aria-hidden className="size-5" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
-  );
-}
-
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
-  const Icon = item.icon;
-  return (
-    <Link
-      href={item.href}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "flex h-9 items-center gap-2 rounded-md px-2 text-sm",
-        active
-          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-          : "text-foreground hover:bg-muted",
-      )}
+    // TooltipProvider wajib: SidebarMenuButton memakai Tooltip saat sidebar diciutkan ke ikon.
+    <TooltipProvider>
+    <SidebarProvider
+      style={{ "--sidebar-width": "18rem", "--header-height": "3rem" } as CSSProperties}
     >
-      <Icon aria-hidden className="size-4" />
-      {item.label}
-    </Link>
+      <a
+        href="#konten"
+        className="sr-only z-50 rounded-md bg-card px-3 py-2 text-sm focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Lewati ke konten
+      </a>
+      <AppSidebar me={me.data} onLogout={onLogout} />
+      <SidebarInset>
+        <SiteHeader />
+        <main id="konten" className="flex flex-1 flex-col">
+          <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-4 py-6 lg:px-6 lg:py-8">
+            {children}
+          </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+    </TooltipProvider>
   );
 }

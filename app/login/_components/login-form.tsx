@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,9 +15,11 @@ import { loginInput } from "@/shared/schemas/auth";
 
 type Values = z.input<typeof loginInput>;
 
+// Formulir masuk (shadcn login-02, design.md 6.17).
 export function LoginForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -40,20 +43,22 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <p className="mb-8 text-center text-xl font-semibold tracking-tight">Kost</p>
-      <h1 className="text-xl font-semibold">Masuk</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Masuk dengan username dan kata sandi Anda.
-      </p>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Masuk ke Kostra</h1>
+        <p className="text-sm text-muted-foreground">
+          Kelola properti dan pengelola kost Anda dalam satu tempat.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-6 flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="username">Username</Label>
           <Input
             id="username"
             autoComplete="username"
             autoCapitalize="none"
+            spellCheck={false}
             aria-invalid={errors.username ? true : undefined}
             aria-describedby={errors.username ? "username-error" : undefined}
             {...register("username")}
@@ -67,14 +72,26 @@ export function LoginForm() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">Kata sandi</Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            aria-invalid={errors.password ? true : undefined}
-            aria-describedby={errors.password ? "password-error" : undefined}
-            {...register("password")}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              className="pr-11"
+              aria-invalid={errors.password ? true : undefined}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...register("password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              aria-pressed={showPassword}
+              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              {showPassword ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
+            </button>
+          </div>
           {errors.password ? (
             <p id="password-error" className="text-sm text-danger">
               {errorMessage(errors.password.message)}
@@ -91,7 +108,11 @@ export function LoginForm() {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Memproses…" : "Masuk"}
         </Button>
-      </form>
-    </div>
+      </div>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Akun dibuat oleh owner. Belum punya akun? Hubungi owner kost Anda.
+      </p>
+    </form>
   );
 }

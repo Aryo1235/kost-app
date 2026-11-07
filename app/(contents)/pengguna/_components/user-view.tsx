@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { codeFromError, errorMessage } from "@/lib/errors";
 import { useMe } from "@/lib/hooks/useMe";
@@ -50,24 +51,25 @@ export function UserView() {
   const nameById = new Map(propertyOptions.map((p) => [p.id, p.name]));
 
   return (
-    <section>
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Pengguna</h1>
-        <CreateUserDialog properties={propertyOptions} />
-      </div>
+    <section className="flex flex-col gap-6">
+      <PageHeader
+        title="Pengguna"
+        description="Akun pengelola dan akses properti mereka"
+        actions={<CreateUserDialog properties={propertyOptions} />}
+      />
 
       {users.isError ? (
-        <p role="alert" className="mt-6 rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
+        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
           {errorMessage(codeFromError(users.error))}
         </p>
       ) : null}
 
-      <ul className="mt-6 divide-y divide-border rounded-md border border-border bg-card">
+      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
         {(users.data ?? []).map((u) => {
           const status = activeStatus(u.isActive);
           const access = u.propertyIds.map((id) => nameById.get(id) ?? "").filter(Boolean);
           return (
-            <li key={u.id} className="flex flex-col gap-3 px-4 py-4">
+            <li key={u.id} className="flex flex-col gap-3 px-6 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="font-medium">{u.name}</p>

@@ -3,9 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/lib/api/trpc";
 
-export function useUsers() {
+// enabled: false untuk pengelola, supaya tidak memanggil prosedur khusus owner.
+export function useUsers(options: { enabled?: boolean } = {}) {
   const trpc = useTRPC();
-  return useQuery(trpc.user.list.queryOptions());
+  return useQuery({ ...trpc.user.list.queryOptions(), enabled: options.enabled ?? true });
 }
 
 // Setiap perubahan pengguna memuat ulang daftar pengguna.
