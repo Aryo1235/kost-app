@@ -282,3 +282,23 @@ describe("pengaturan properti", () => {
     });
   });
 });
+
+describe("daftar properti: jumlah kamar", () => {
+  it("memuat jumlah per status dan tidak menghitung kamar yang sudah dihapus", async () => {
+    const ctx = await sessionFor("owner.a");
+    await caller(ctx).room.update({ roomId: s.roomA1, status: "BROKEN" });
+    await caller(ctx).room.create(room(s.propA1, "A-02"));
+
+    const before = await caller(ctx).property.list();
+    expect(before.find((p) => p.id === s.propA1)).toMatchObject({
+      roomCount: 2,
+      availableCount: 1,
+      brokenCount: 1,
+    });
+    expect(before.find((p) => p.id === s.propA2)).toMatchObject({ roomCount: 0 });
+
+    await caller(ctx).room.remove({ roomId: s.roomA1 });
+    const after = await caller(ctx).property.list();
+    expect(after.find((p) => p.id === s.propA1)).toMatchObject({ roomCount: 1, brokenCount: 0 });
+  });
+});
