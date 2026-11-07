@@ -1,6 +1,6 @@
 # Panduan Desain Kostra
 
-**Versi:** 0.6 · **Tanggal:** 7 November 2026
+**Versi:** 0.8 · **Tanggal:** 7 November 2026
 **Nama produk:** Kostra
 **Berlaku untuk:** seluruh aplikasi (login, area berlogin, ekspor PDF bila relevan)
 **Dibaca bersama:** `AGENTS.md`, `docs/PRD.md` (bagian 1, 2, 7, 8, 9), `docs/TECH-SPEC.md` (bagian 6)
@@ -27,6 +27,7 @@ Dokumen ini satu-satunya sumber warna, huruf, jarak, dan pola komponen. Agen pen
 | Kamar dan properti (0.4) | Belum diatur | **Daftar kamar** dengan kolom properti saat "Semua properti" (6.19). **Form kamar** halaman penuh (6.20). **Sakelar** dan pola listrik di pengaturan properti (6.20) |
 | Detail kamar (0.5) | Belum diatur | **Halaman detail kamar** baca saja: strip harga dan status, bagian data kamar, dan bagian lain yang muncul bertahap (6.21, 7.7). Ubah dan hapus pindah dari form ke halaman detail (6.20, 6.21) |
 | Keputusan M1 (0.6) | Pola listrik A sampai E, harga bisa 0, detail dan ubah kamar satu halaman | **Pola A sampai E saja** (BR-17). Keterangan pola ditulis dalam bahasa awam. **Harga harus lebih dari 0.** **Detail dan ubah kamar dipisah** (6.21). Lihat 11.1 |
+| Cakupan properti per halaman (0.8) | Pemilih properti global di navbar | **Filter properti di tiap halaman** (6.16), navbar tanpa pemilih. Kamar selalu menyebut propertinya (6.22, 7.8). PRD FR-PRO-02 dan FR-PRO-06 ikut berubah |
 
 ---
 
@@ -265,7 +266,7 @@ Desktop:
 ```
 ┌──────────────────────┬──────────────────────────────────────────────────────────┐
 │ ▣ Kostra             │ ┌──────────────────────────────────────────────────────┐ │
-│   Kost Melati Group  │ │ [≡] │ Beranda / Properti           [Melati ▾]          │ │ navbar 48px
+│   Kost Melati Group  │ │ [≡] │ Beranda / Properti                               │ │ navbar 48px
 │                      │ ├──────────────────────────────────────────────────────┤ │
 │ RINGKASAN            │ │                                                      │ │
 │ ⌂ Beranda            │ │  Properti                          [Tambah properti] │ │ header halaman
@@ -291,7 +292,7 @@ HP:
 
 ```
 ┌───────────────────────────────┐
-│ [≡]  Properti     [Melati ▾]  │  navbar 56px, menempel di atas
+│ [≡]  Properti                 │  navbar 56px, menempel di atas
 ├───────────────────────────────┤
 │ Properti                      │
 │ 2 properti     [+ Tambah]     │
@@ -310,13 +311,13 @@ Komponen: `components/layout/app-sidebar.tsx` (dari `app-sidebar` template), mem
 | Tengah (`SidebarContent`) | Menu berkelompok. Label grup 12/500 redup, tanpa huruf kapital penuh di kode (kapital hanya di sketsa). Item: ikon 16px + teks 14px, tinggi 32px. Item aktif: latar `--sidebar-accent`, teks 500. Saat diciutkan, tooltip nama menu. |
 | Bawah (`SidebarFooter`) | Menu pengguna (`nav-user`): avatar kotak 32px berisi inisial (tanpa foto), nama (14/500), peran (12, redup), ikon titik tiga. Membuka dropdown: nama dan username, **Akun**, garis, **Keluar**. |
 
-Kelompok menu (disembunyikan sesuai peran dan pengaturan properti, BR-16):
+Kelompok menu (disembunyikan sesuai peran. Menu bersyarat tampil bila minimal satu properti yang bisa diakses pengguna mengaktifkannya, BR-16):
 
 | Grup | Menu (rute) | Tampil jika |
 | --- | --- | --- |
 | Ringkasan | Beranda (`/dashboard`) | Selalu |
 | Operasional | Properti (`/properti`), Kamar (`/kamar`), Tenant (`/tenant`), Tagihan (`/tagihan`) | Kamar, Tenant, Tagihan mulai milestone masing-masing |
-| | Listrik (`/listrik`) | Properti mengaktifkan listrik dikelola aplikasi |
+| | Listrik (`/listrik`) | Minimal satu properti yang bisa diakses mengaktifkan listrik dikelola aplikasi |
 | | Asset (`/asset`), Maintenance (`/maintenance`), Pengeluaran (`/pengeluaran`) | Mulai milestone masing-masing |
 | Laporan | Laporan (`/laporan`), Audit Log (`/audit-log`) | Audit Log owner saja |
 | Pengaturan | Pengguna (`/pengguna`), Pengaturan (`/pengaturan`) | Pengguna owner saja |
@@ -330,7 +331,7 @@ Komponen: `components/layout/site-header.tsx` (dari `site-header` template).
 | Posisi | Isi |
 | --- | --- |
 | Kiri | Tombol pemicu sidebar (ikon panel, 32px desktop, 44px HP), garis pemisah vertikal 16px, lalu breadcrumb: `Beranda / Properti` (14/500, item terakhir `--foreground`, sebelumnya redup dan bisa diklik). Di HP hanya nama halaman. |
-| Kanan | **Pemilih properti** (mulai M1, FR-PRO-02): tombol outline 32px berisi nama properti dan panah. Owner punya opsi "Semua properti". Bila hanya satu properti, teks biasa tanpa panah. |
+| Kanan | Kosong di fase 1. Tidak ada pemilih properti: cakupan properti ditentukan di tiap halaman lewat filter (6.16). |
 
 - Navbar berada di dalam panel inset, garis bawah 1px, menempel di atas saat halaman digulir.
 - Navbar **tidak** memuat tombol aksi utama. Tombol aksi utama ada di header halaman (5.4), supaya tetap satu per layar.
@@ -354,7 +355,7 @@ Keterangan satu baris (redup, contoh: "2 properti")
 Desktop, di bawah header halaman:
 
 ```
-[🔍 Cari kamar atau nama…        ] [Periode: Nov 2026 ▾] [Status: Semua ▾]   Hapus filter
+[🔍 Cari kamar atau nama…        ] [Properti: Semua ▾] [Periode: Nov 2026 ▾] [Status: Semua ▾]   Hapus filter
 ```
 
 HP:
@@ -364,7 +365,7 @@ HP:
 ( Semua )( Belum bayar )( Terlambat )( Lunas )  → bisa digeser
 ```
 
-Filter disimpan di URL (TECH-SPEC 6.3). Tombol "Filter" di HP membuka sheet bawah berisi semua filter.
+Filter disimpan di URL (TECH-SPEC 6.3). Tombol "Filter" di HP membuka sheet bawah berisi semua filter, kecuali filter Properti yang tampil sebagai baris sendiri di bawah kolom cari (6.16). Halaman yang bercakupan properti memasang filter Properti sebagai kontrol pertama setelah kolom cari.
 
 ---
 
@@ -377,7 +378,7 @@ Komponen dasar dari shadcn di `components/ui`. Komponen gabungan di `components/
 | Varian | Tampilan | Pemakaian |
 | --- | --- | --- |
 | `default` (utama) | Latar `--primary`, teks putih, hover `--primary-hover` | **Satu per layar** |
-| `outline` | Latar `--card`, garis `--input`, hover `--muted` | Aksi kedua, Batal, pemilih properti |
+| `outline` | Latar `--card`, garis `--input`, hover `--muted` | Aksi kedua, Batal |
 | `ghost` | Tanpa garis dan latar, hover `--muted` | Pemicu sidebar, aksi di toolbar |
 | `destructive` | Latar `--destructive`, teks putih | Hanya di dialog konfirmasi |
 | `link` | Teks `--primary`, garis bawah saat hover | Tautan dalam kalimat |
@@ -522,9 +523,21 @@ Recharts lewat komponen chart shadcn. Area atau batang, seri `--chart-1` sampai 
 
 Avatar kotak 32px, radius 8, latar `--muted`, inisial 12/600 (dua huruf pertama nama). Tanpa foto pengguna. Dropdown terbuka ke kanan di desktop, ke atas di HP. Isi: nama (14/500) dan `@username` (12 redup), garis, "Akun" (ikon `UserCog`), garis, "Keluar" (ikon `LogOut`).
 
-### 6.16 Pemilih properti
+### 6.16 Filter properti
 
-Tombol `outline` 32px di navbar dengan ikon `Building2` 16, nama properti (terpotong dengan elipsis bila panjang, maksimal 200px), dan `ChevronsUpDown`. Membuka dropdown (desktop) atau sheet bawah (HP) berisi daftar properti dengan tanda centang, ditambah "Semua properti" untuk owner. Mulai M1.
+Pengganti pemilih properti global (versi 0.8, PRD FR-PRO-02). Tidak ada properti aktif yang berlaku di semua halaman. Setiap halaman yang bercakupan properti punya filter sendiri.
+
+- **Letak:** kontrol pertama setelah kolom cari di bar filter (5.5). Di Dashboard dan Laporan: di bawah header halaman. Di HP: satu baris penuh (44px) di bawah kolom cari, tidak di dalam sheet "Filter", karena paling sering dipakai.
+- **Bentuk:** select native bergaya Input (6.3) dengan label "Properti" yang terlihat. Bila lebih dari 7 properti: combobox yang bisa dicari.
+- **Pilihan:** "Semua properti" untuk owner, atau "Semua properti saya" untuk pengelola yang ditugaskan ke lebih dari satu properti. Lalu tiap properti aktif yang bisa diakses, berurut abjad. Properti nonaktif tidak muncul (FR-PRO-03).
+- **Nilai awal "Semua", disimpan di URL** (`?properti=ID`). Halaman bisa dibagikan dan dimuat ulang, dan tombol kembali bekerja. Tidak ada cookie dan tidak ada ingatan antarhalaman.
+- **Tidak ikut berpindah halaman.** Tautan sidebar tidak membawa filter. Tautan di dalam konten yang memang menuju satu properti (jumlah kamar di halaman Properti, properti di detail kamar) membawa `?properti=ID`.
+- **Pengelola dengan satu properti:** filter tidak tampil. Nama propertinya ditulis di keterangan header halaman.
+- **Header menulis cakupan:** keterangan header menyebut properti yang disaring ("Melati" atau "Semua properti"), supaya cakupan terbaca tanpa membuka filter.
+- **Kolom Properti di daftar:** daftar yang bisa mencakup lebih dari satu properti (kamar, tenant, tagihan, asset, tiket, pengeluaran, meteran) menampilkan kolom Properti saat filter bernilai "Semua", sama seperti daftar kamar (6.19). Daftar asset juga menampilkan "Kamar" atau "Fasum" di kolom lokasi.
+- **Halaman tanpa filter:** Properti, Pengguna, Pengaturan, Akun, dan Audit log (halaman ini punya filter properti sendiri di bar filternya).
+- **Formulir tidak bergantung pada filter.** Form pembuatan selalu menanyakan properti secara eksplisit (6.22). Filter hanya memberi nilai awal lewat `?properti=ID`.
+- **Menu bersyarat (BR-16):** menu Listrik tampil bila minimal satu properti yang bisa diakses mengaktifkan listrik dikelola. Asset dan Maintenance selalu tampil, dengan bagian fasum hanya untuk properti yang punya fasum. Di halaman bersyarat, filter hanya menawarkan properti yang mengaktifkannya.
 
 ### 6.17 Halaman login (`login-02`)
 
@@ -559,16 +572,16 @@ Desktop (≥1024px)
 
 ### 6.19 Daftar kamar (`/kamar`)
 
-- Judul "Kamar". Keterangan memuat nama properti yang dipilih di navbar, atau "Semua properti". Tombol "Tambah kamar" (utama) hanya tampil saat satu properti dipilih.
-- Bar filter (5.5): kolom "Cari kode kamar…", pilihan status "Semua status / Kosong / Terisi / Rusak", dan "Hapus filter" (hantu) saat ada filter. Cari, status, dan halaman disimpan di URL (`q`, `status`, `page`) dan dijalankan di server.
-- Kolom tabel: Kode (tautan ke halaman kamar), Properti (hanya saat "Semua properti"), Tipe (kosong ditulis "—"), Harga sewa (rata kanan, `tabular-nums`), Status (`StatusBadge`).
-- HP: satu kartu per kamar. Baris pertama kode dan status, baris kedua tipe (dan properti bila perlu), baris ketiga harga dengan "/ bulan". Tidak ada gulir samping.
+- Judul "Kamar". Keterangan memuat cakupan (6.16): nama properti yang disaring, atau "Semua properti". Tombol "Tambah kamar" (utama) selalu tampil, dan properti dipilih di form (6.20). Bila filter menunjuk satu properti, tautannya membawa `?properti=ID`.
+- Bar filter (5.5): kolom "Cari kode kamar…", filter Properti (6.16), pilihan status "Semua status / Kosong / Terisi / Rusak", dan "Hapus filter" (hantu) saat ada filter. Cari, properti, status, dan halaman disimpan di URL (`q`, `properti`, `status`, `page`) dan dijalankan di server. Daftar diurutkan menurut properti lalu kode.
+- Kolom tabel: Kode (tautan ke halaman kamar), Properti (hanya saat lebih dari satu properti tercakup, yaitu filter "Semua"), Tipe (kosong ditulis "—"), Harga sewa (rata kanan, `tabular-nums`), Status (`StatusBadge`).
+- HP: satu kartu per kamar. Baris pertama kode dan status, baris kedua properti (tebal, hanya bila lebih dari satu properti tercakup) dan tipe (redup), baris ketiga harga dengan "/ bulan". Tidak ada gulir samping.
 - Kosong: "Belum ada kamar" dengan satu kalimat. Hasil filter kosong: "Tidak ada data yang cocok" dengan tombol "Hapus filter".
 
 ### 6.20 Form kamar dan pengaturan properti
 
 **Form kamar** memakai halaman penuh karena isiannya lebih dari 4 kolom (1.3). Isian berada di satu kartu: dua kolom di desktop, satu kolom di HP.
-- Urutan: Kode kamar (bantuan: unik di dalam properti, huruf besar dan kecil dianggap sama), Tipe kamar, Harga sewa per bulan (`MoneyInput`), Status, Fasilitas kamar, Catatan.
+- Urutan: Properti (select wajib, nilai awal dari `?properti=ID`, baca-saja bila pengguna hanya punya satu properti dan saat ubah), Kode kamar (bantuan: unik di dalam properti yang dipilih, huruf besar dan kecil dianggap sama), Tipe kamar, Harga sewa per bulan (`MoneyInput`), Status, Fasilitas kamar, Catatan.
 - Status hanya Kosong dan Rusak yang bisa dipilih. Terisi tampil sebagai keterangan saja dan diatur otomatis saat ada penghuni (M2).
 - Tombol: "Batal" (garis) dan "Simpan kamar" atau "Simpan perubahan" (utama, satu per layar). Hapus kamar tidak ada di form. Aksi hapus ada di menu ⋯ halaman detail (6.21).
 
@@ -599,7 +612,7 @@ Disetujui (versi 0.6, lihat 11.1). Polanya sama dengan detail tenant (7.3): hala
 - Sel baru ditambahkan saat fiturnya ada: "Penyewa" (M2). Bila data belum ada, tampilkan "–".
 
 **Bagian** (6.18, judul di kiri, panel di kanan), urutannya tetap:
-1. **Data kamar** (M1). Baris label-nilai: Tipe kamar, Fasilitas kamar, Catatan. Kosong ditulis "–". Kode dan harga tidak diulang karena sudah ada di judul dan strip.
+1. **Data kamar** (M1). Baris label-nilai: Properti (tautan ke `/kamar?properti=ID`), Tipe kamar, Fasilitas kamar, Catatan. Kosong ditulis "–". Kode dan harga tidak diulang karena sudah ada di judul dan strip.
 2. **Penyewa aktif** (M2, FR-ROOM-07). Nama, kontak, tanggal masuk, dan tautan ke detail tenant (7.3). Kamar kosong cukup satu kalimat, misalnya "Kamar ini sedang kosong.", tanpa tombol.
 3. **Riwayat meteran** (M4). Hanya tampil bila listrik properti dikelola (BR-16, FR-PRO-05). Berisi meteran yang melayani kamar dan angka terakhir.
 4. **Asset kamar** dan **Tiket maintenance** (M5). Baris bergaris. Setiap asset menampilkan kondisi (6.7), setiap tiket menampilkan statusnya (6.7).
@@ -630,6 +643,30 @@ Aturan bagian:
 
 ---
 
+### 6.22 Kamar dan propertinya (0.8)
+
+Keputusan pemilik produk: cakupan properti ditentukan per halaman (PRD FR-PRO-02, 6.16), bukan lewat pemilih global. Bagian ini menyesuaikan tampilan kamar dengan keputusan itu.
+
+**Masalah yang diselesaikan**
+- Setiap kamar milik tepat satu properti (di database `property_id` wajib), tetapi tampilan lama lemah menyatakannya: properti hanya tertulis kecil di bawah judul, form tambah kamar tidak menyebut properti, dan tombol "Tambah kamar" hilang saat "Semua properti".
+- Kode kamar hanya unik di dalam satu properti ("A-01" boleh ada di Melati dan Mawar). Kode saja tidak cukup untuk mengenali kamar.
+- Pemilih global memaksakan satu cakupan ke semua halaman, termasuk halaman yang tidak memakainya.
+
+**Prinsip**
+1. Identitas kamar adalah properti + kode. Di tempat mana pun properti tidak jelas dari halamannya, properti ikut ditulis.
+2. Cakupan properti ditentukan oleh filter di halaman itu sendiri, bukan oleh pilihan di tempat lain.
+3. Tidak ada pilihan tersembunyi: properti tempat kamar dibuat selalu terlihat dan dipilih di form.
+
+**Aturan**
+1. **Daftar kamar**: filter Properti di bar filter (6.16). Saat "Semua", kolom Properti tampil dan daftar diurutkan properti lalu kode. Di HP properti jadi baris kedua yang tebal (14/500), tipe redup di sampingnya. Saat satu properti, tidak ada kolom Properti, dan keterangan header memakai ikon `Building2` 16 redup di depan nama properti. "Tambah kamar" selalu tampil. Bila filter menunjuk satu properti, tautannya `/kamar/baru?properti=ID`.
+2. **Form tambah kamar**: kolom pertama "Properti" (select native, wajib). Nilai awal dari `?properti=ID`, bila tidak ada kosong dengan teks "Pilih properti". Isinya properti aktif yang bisa diakses pengguna (FR-PRO-03). Pengelola dengan satu properti melihat baris baca-saja "Properti Melati". Bantuan kolom kode: "Unik di dalam properti yang dipilih."
+3. **Form ubah kamar**: properti tampil sebagai baris baca-saja di atas isian, dengan bantuan "Kamar tidak bisa dipindah ke properti lain." Pemindahan kamar tidak masuk fase 1.
+4. **Detail kamar**: "Properti" menjadi baris pertama bagian Data kamar, nilainya tautan ke `/kamar?properti=ID`. Navbar tidak punya pemilih, jadi tidak ada konteks yang bisa bertentangan dengan halaman.
+5. **Halaman Properti**: setiap baris memuat satu baris fakta, misalnya "10 kamar · 3 kosong · 1 rusak", sebagai tautan ke `/kamar?properti=ID`. Aksi baris: "Ubah" (garis) dan menu ⋯ berisi "Tambah kamar" (menuju `/kamar/baru?properti=ID`) dan "Nonaktifkan" (merah). Properti nonaktif tidak punya "Tambah kamar". Angka dihitung server (AGENTS aturan 6), bukan di layar.
+6. **Pengelola dengan banyak properti**: filter "Semua properti saya" di halaman daftar (6.16, FR-PRO-06). Tambah dan ubah tetap per satu properti. Harus memilih ulang filter di tiap halaman diterima untuk fase 1 (lihat 11.2 butir 5).
+
+---
+
 ## 7. Sketsa Teks Layar
 
 Semua layar memakai kerangka bagian 5 (sidebar + navbar di desktop, laci di HP). Sketsa hanya menggambar isi panel inset.
@@ -638,10 +675,10 @@ Semua layar memakai kerangka bagian 5 (sidebar + navbar di desktop, laci di HP).
 
 Desktop:
 ```
-[≡] │ Beranda                                                     [Semua properti ▾]
+[≡] │ Beranda
 ──────────────────────────────────────────────────────────────────────────────────
 Selamat pagi, Owner A
-Ringkasan November 2026
+Ringkasan November 2026                                       [Properti: Semua ▾]
 
 ┌ Sudah masuk ──────┐┌ Belum masuk ──────┐┌ Terlambat ────────┐┌ Kamar terisi ────┐
 │ Rp 18.750.000     ││ Rp 5.000.000      ││ Rp 2.500.000      ││ 22 / 25          │
@@ -663,23 +700,23 @@ HP: kartu bertumpuk satu kolom, grafik penuh lebar, tab tabel menjadi daftar kar
 ### 7.2 Daftar tagihan
 
 ```
-[≡] │ Beranda / Tagihan                                          [Melati ▾]
+[≡] │ Beranda / Tagihan
 ──────────────────────────────────────────────────────────────────────────
 Tagihan                                            (P)[Buat tagihan bulan ini]
 24 tagihan · November 2026
-[ Semua | Belum bayar | Terlambat | Lunas ]     [🔍 Cari…] [Periode ▾]
+[ Semua | Belum bayar | Terlambat | Lunas ] [🔍 Cari…] [Properti: Melati ▾] [Periode ▾]
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Kamar  Tenant          Jatuh tempo  Nominal        Status        Aksi  │
 │ A-03   Budi Santoso    5 Nov 2026   Rp 1.250.000   Terlambat…  [Tandai lunas] ⋯ │
 └────────────────────────────────────────────────────────────────────────┘
 Menampilkan 1–20 dari 24                          [Sebelumnya] [Berikutnya]
 ```
-HP: navbar `[≡] Tagihan [Melati ▾]`, judul + "+ Buat", tab bisa digeser, daftar kartu dengan tombol "Tandai lunas" 44px.
+HP: navbar `[≡] Tagihan`, judul + "+ Buat", filter Properti sebagai baris penuh di bawah kolom cari, tab bisa digeser, daftar kartu dengan tombol "Tandai lunas" 44px.
 
 ### 7.3 Detail tenant
 
 ```
-[≡] │ Beranda / Tenant / Budi Santoso                                [Melati ▾]
+[≡] │ Beranda / Tenant / Budi Santoso
 ─────────────────────────────────────────────────────────────────────────────
 Budi Santoso   Aktif                                (P)[Ubah data]  ⋯
 Kamar A-03 · Masuk 5 Okt 2025 · Tagihan tiap tanggal 5
@@ -706,7 +743,7 @@ Lihat 6.17.
 
 Desktop:
 ```
-[≡] │ Beranda / Kamar / A-07                                        [Melati ▾]
+[≡] │ Beranda / Kamar
 ──────────────────────────────────────────────────────────────────────────────
 A-07                                                     [Ubah data]    ⋯
 Properti Melati
@@ -726,6 +763,56 @@ Diisi di form ubah.            │ Tipe kamar     AC                        │
 ```
 
 HP: judul dan aksi di dua baris, strip bertumpuk (divide-y), bagian satu kolom, label di atas nilai.
+
+---
+
+### 7.8 Kamar dan properti (0.8)
+
+Daftar kamar, filter Properti "Semua" (owner, atau pengelola dengan banyak properti):
+```
+[≡] │ Beranda / Kamar
+────────────────────────────────────────────────────────────────────────────────
+Kamar                                                            [Tambah kamar]
+Semua properti
+[Cari kode kamar…         ] [Properti: Semua ▾] [Semua status ▾]
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Kode    Properti   Tipe                     Harga sewa       Status        │
+│ A-01    Mawar      AC                       Rp 900.000       Kosong        │
+│ A-01    Melati     Standar                  Rp 1.000.000     Kosong        │
+│ A-02    Melati     Standar                  Rp 1.100.000     Kosong        │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+Daftar kamar, pengelola dengan satu properti (tanpa filter Properti dan tanpa kolom Properti):
+```
+Kamar                                                            [Tambah kamar]
+Melati
+[Cari kode kamar…         ] [Semua status ▾]
+```
+
+Form tambah kamar (properti dipilih di form):
+```
+Tambah kamar
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Properti                [Pilih properti                                  ▾] │
+│ Kode kamar              [                ]    Tipe kamar     [             ] │
+│ Unik di dalam properti yang dipilih.                                        │
+│ Harga sewa per bulan    [Rp              ]    Status         [Kosong     ▾] │
+│ Fasilitas kamar         [                                                 ] │
+│ Catatan                 [                                                 ] │
+└────────────────────────────────────────────────────────────────────────────┘
+                                                      [Batal] [Simpan kamar]
+```
+
+Baris di halaman Properti:
+```
+Melati                                                          [Ubah]    ⋯
+Jl. Contoh No. 1, Jakarta Selatan                                    ┌ Tambah kamar
+[Ada fasum] [Listrik dikelola] [Pola C]                              └ Nonaktifkan
+11 kamar · 10 kosong · 1 rusak  →
+```
+
+HP: filter Properti tampil sebagai baris penuh di bawah kolom cari. Kartu kamar saat "Semua" menulis properti tebal di baris kedua.
 
 ---
 
@@ -856,6 +943,8 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 | Keterangan pola (0.6) | Ditulis dalam bahasa awam, satu kalimat per pola: siapa yang membayar PLN dan apakah ditagihkan ke penyewa (6.20) |
 | Harga sewa (0.6) | Harus lebih dari 0, sesuai 6.4. Harga 0 ditolak |
 | Detail dan ubah kamar (0.6) | Dipisah: `/kamar/[id]` untuk baca, `/kamar/[id]/ubah` untuk form. Hapus kamar di menu ⋯ halaman detail (6.21) |
+| Cakupan properti per halaman (0.8) | Filter properti di tiap halaman bercakupan properti, tersimpan di URL, bernilai awal "Semua". Tidak ada pemilih global di navbar. PRD FR-PRO-02 diubah (6.16) |
+| Pengelola banyak properti (0.8) | "Semua properti saya" di halaman daftar. Tambah dan ubah tetap per satu properti. Asumsi di PRD FR-PRO-06 |
 
 ### 11.2 Masih terbuka
 
@@ -863,3 +952,4 @@ Token bagian 2.1 ditulis sebagai variabel `:root` dan dipetakan di `@theme inlin
 2. **Istilah baku:** "Tenant" atau "Penghuni", "Owner" atau "Pemilik".
 3. **Huruf ekspor PDF:** TECH-SPEC 7.4 menyebut Inter. Agar seragam, sebaiknya Plus Jakarta Sans. Perubahan ini di TECH-SPEC, bukan di sini.
 4. **Foto kost sendiri** untuk menggantikan foto stand-in di login (kamar, jendela, atau bangunan, orientasi potret).
+5. **Ingat pilihan filter properti per halaman** (0.8): sekarang filter selalu mulai dari "Semua" di setiap halaman. Bila pengelola banyak properti mengeluh harus memilih ulang, tambahkan ingatan pilihan terakhir per halaman di perangkat (bukan global).

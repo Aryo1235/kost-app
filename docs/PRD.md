@@ -1,7 +1,8 @@
 # PRD: Aplikasi Manajemen Kost
 
-**Versi:** 0.1 (draft untuk vibe coding)
-**Tanggal:** 6 November 2026
+**Versi:** 0.2 (draft untuk vibe coding)
+**Tanggal:** 7 November 2026
+**Perubahan 0.2:** filter properti per halaman menggantikan pemilih properti global (FR-PRO-02, FR-PRO-06, BR-16).
 **Nama produk:** belum ditentukan
 **Bahasa antarmuka:** Indonesia
 
@@ -70,7 +71,7 @@ Aplikasi web (mobile dan desktop) yang dipakai **owner** dan **pengelola**. Peng
 
 **[PUTUSAN]** Owner bisa melakukan semuanya: semua kemampuan pengelola untuk seluruh propertinya, ditambah mengelola akun, pengaturan, dan audit log. Pengelola mengisi data operasional harian untuk properti yang ditugaskan.
 **[ASUMSI]** Hanya owner yang boleh membuat properti, membuat akun pengelola, dan mengatur akses pengelola per properti.
-**[TERBUKA]** Apakah satu pengelola bisa memegang beberapa properti. Model data dibuat siap untuk itu (relasi banyak-ke-banyak), antarmuka menyediakan pemilih properti.
+**[TERBUKA]** Apakah satu pengelola bisa memegang beberapa properti. Model data dibuat siap untuk itu (relasi banyak-ke-banyak), antarmuka menyediakan filter properti di setiap halaman daftar, termasuk "Semua properti saya" (FR-PRO-02, FR-PRO-06).
 
 ### 2.2 Matriks Hak Akses
 
@@ -150,7 +151,7 @@ Booking online, akses tenant, deposit, pemasukan selain sewa, pembayaran sebagia
 | BR-13 | Semua tanggal memakai zona waktu **Asia/Jakarta (WIB)**                                                                                                                                          | ASUMSI  |
 | BR-14 | Data yang dihapus memakai soft delete (`deleted_at`), kecuali foto yang diganti                                                                                                                  | ASUMSI  |
 | BR-15 | Aplikasi dipakai banyak owner. Perbedaan kondisi antar owner (ada tidaknya fasum, bentuk meteran, penanggung listrik) diatur sebagai **pengaturan per properti**, bukan fitur terpisah per owner | PUTUSAN |
-| BR-16 | Menu dan fitur yang tidak relevan untuk suatu properti (fasum, listrik) disembunyikan sesuai pengaturan properti                                                                                 | ASUMSI  |
+| BR-16 | Menu dan fitur yang tidak relevan (fasum, listrik) disembunyikan sesuai pengaturan properti. Menu tampil jika minimal satu properti yang dapat diakses pengguna mengaktifkannya. Di dalam halaman, fitur itu hanya berlaku untuk properti yang mengaktifkannya | ASUMSI  |
 | BR-17 | Fase 1 hanya mendukung pola listrik di Lampiran C. Kasus di luar pola dicatat di kolom catatan atau di luar sistem. Pola baru ditambah jika ada pemilik yang benar-benar membutuhkannya          | ASUMSI  |
 | BR-18 | Fase 1 **tanpa pekerjaan terjadwal (cron)**. Tindakan yang bergantung pada waktu dipicu saat halaman dibuka atau lewat tombol                                                                    | PUTUSAN |
 
@@ -278,17 +279,18 @@ Kriteria diterima:
 | ID        | Kebutuhan                                                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | FR-PRO-01 | Owner membuat, mengubah, dan menonaktifkan properti (nama, alamat, catatan)                                                                                                                                          |
-| FR-PRO-02 | Semua layar operasional memiliki pemilih properti di bagian atas. Owner punya opsi "Semua properti" untuk laporan dan dashboard                                                                                      |
-| FR-PRO-03 | Properti yang dinonaktifkan tidak muncul di pemilih, tetapi datanya tetap ada di laporan bulan lampau                                                                                                                |
+| FR-PRO-02 | Halaman yang bercakupan properti (Dashboard, Kamar, Tenant, Tagihan, Maintenance, Asset, Listrik, Pengeluaran, Laporan) memiliki **filter properti** di halaman itu, disimpan di URL dan bernilai awal "Semua". **Tidak ada pemilih properti global.** Formulir pembuatan selalu menanyakan properti secara eksplisit. Halaman tingkat organisasi (Properti, Pengguna, Pengaturan, Audit log, Akun) tidak memakai filter ini **[PUTUSAN]** |
+| FR-PRO-03 | Properti yang dinonaktifkan tidak muncul di filter dan di pilihan properti pada formulir, tetapi datanya tetap ada di laporan bulan lampau |
 | FR-PRO-04 | Saat membuat properti, pengguna mengisi **pengaturan properti** lewat pertanyaan singkat: ada fasum atau tidak, listrik dikelola aplikasi atau tidak, dan pola listrik (Lampiran C). Pengaturan bisa diubah kemudian |
-| FR-PRO-05 | Menu dan fitur mengikuti pengaturan properti (BR-16): tanpa fasum, asset dan maintenance fasum tidak tampil. Jika listrik tidak dikelola aplikasi, menu Listrik tidak tampil                                         |
+| FR-PRO-05 | Menu dan fitur mengikuti pengaturan properti (BR-16): menu Listrik tampil jika minimal satu properti yang dapat diakses mengaktifkan listrik dikelola aplikasi. Asset dan maintenance fasum hanya berlaku untuk properti yang punya fasum. Di halaman bersyarat, filter hanya menawarkan properti yang mengaktifkannya |
+| FR-PRO-06 | Opsi "Semua properti" tersedia untuk owner. Pengelola yang ditugaskan ke lebih dari satu properti melihat "Semua properti saya", yang hanya mencakup properti yang ditugaskan kepadanya. Pengelola dengan satu properti tidak melihat filter, nama propertinya tertulis di header halaman **[ASUMSI]** |
 
 ### 7.3 Kamar
 
 | ID         | Kebutuhan                                                                                                                                                                         |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | FR-ROOM-01 | Pengelola membuat dan mengubah kamar: kode, tipe, harga sewa dasar, fasilitas, meteran listrik yang melayani kamar (dipilih dari daftar meteran, jika listrik dikelola), catatan  |
-| FR-ROOM-02 | Daftar kamar menampilkan status, nama tenant aktif, dan status pembayaran bulan berjalan. Bisa difilter per status dan dicari berdasarkan kode atau nama tenant                   |
+| FR-ROOM-02 | Daftar kamar menampilkan status, nama tenant aktif, dan status pembayaran bulan berjalan. Bisa difilter per properti dan status, dan dicari berdasarkan kode atau nama tenant                   |
 | FR-ROOM-03 | Status `OCCUPIED` diatur otomatis saat tenant ditempatkan, dan `AVAILABLE` otomatis saat tenant keluar (BR-04)                                                                    |
 | FR-ROOM-04 | Status `BROKEN` hanya bisa diatur manual dan hanya jika kamar **tidak** punya tenant aktif **[ASUMSI]**. Kamar berpenghuni yang ada kerusakan dicatat lewat asset dan maintenance |
 | FR-ROOM-05 | Jika tiket maintenance ditandai `makes_room_unusable` dan kamar tidak berpenghuni, status kamar otomatis `BROKEN`, lalu kembali `AVAILABLE` saat tiket `DONE`                     |
@@ -309,7 +311,7 @@ Kriteria diterima:
 | FR-TEN-08 | Saat tenant dibuat, sistem otomatis membuat tagihan pertama (lihat 7.5) dan baris pertama di `rent_price_history`                                                                                                                                                                                                                                                                                                                                           |
 | FR-TEN-09 | Mengubah harga sewa meminta tanggal mulai berlaku dan menambah baris `rent_price_history`. Tagihan yang sudah dibuat tidak berubah                                                                                                                                                                                                                                                                                                                          |
 | FR-TEN-10 | Fitur ubah harga massal: pengelola memilih beberapa tenant atau semua tenant satu properti, memasukkan harga atau persentase baru dan tanggal mulai berlaku                                                                                                                                                                                                                                                                                                 |
-| FR-TEN-11 | Daftar tenant bisa dicari (nama, kamar, nomor) dan difilter (aktif, keluar, ada tunggakan)                                                                                                                                                                                                                                                                                                                                                                  |
+| FR-TEN-11 | Daftar tenant bisa dicari (nama, kamar, nomor) dan difilter (properti, aktif, keluar, ada tunggakan)                                                                                                                                                                                                                                                                                                                                                                  |
 | FR-TEN-12 | NIK disamarkan di daftar (misalnya hanya 4 digit terakhir). NIK penuh hanya terlihat di halaman detail, oleh pengelola dan owner                                                                                                                                                                                                                                                                                                                            |
 | FR-TEN-13 | Foto tenant diunggah dari kamera atau galeri dan disimpan privat (BAGIAN 10.2)                                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -375,7 +377,7 @@ Kriteria diterima:
 
 ### 7.8 Listrik
 
-Menu Listrik hanya tampil jika properti mengaktifkan "listrik dikelola aplikasi" (FR-PRO-05). Tiga hal diatur terpisah, sehingga berbagai kondisi pemilik kost bisa tertampung tanpa kode khusus (BR-15):
+Menu Listrik hanya tampil jika minimal satu properti yang dapat diakses pengguna mengaktifkan "listrik dikelola aplikasi" (FR-PRO-05). Tiga hal diatur terpisah, sehingga berbagai kondisi pemilik kost bisa tertampung tanpa kode khusus (BR-15):
 
 | Yang diatur              | Pilihan                                                                                                  | Diatur di                                         |
 | ------------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -463,7 +465,7 @@ Ada dua jenis, masing-masing dengan biayanya sendiri (**[PUTUSAN]**):
 | FR-MNT-08 | Halaman tiket menampilkan foto sebelum dan sesudah berdampingan                                                                               |
 | FR-MNT-09 | Kerusakan dari laporan tenant diinput pengelola atas nama tenant, dengan kolom "dilaporkan oleh" berisi nama tenant bila relevan **[ASUMSI]** |
 | FR-MNT-10 | Saat tiket `DONE`, biayanya otomatis dihitung sebagai pengeluaran kategori "Perawatan dan perbaikan" di laporan, tanpa input ganda (BR-05)    |
-| FR-MNT-11 | Daftar tiket bisa difilter: jenis, status, properti, kamar atau fasum, periode                                                                |
+| FR-MNT-11 | Daftar tiket bisa difilter: jenis, status, properti, kamar atau fasum, periode. Daftar jadwal bisa difilter per properti                                                                |
 
 ### 7.11 Pengeluaran Operasional
 
@@ -493,7 +495,7 @@ Ada dua jenis, masing-masing dengan biayanya sendiri (**[PUTUSAN]**):
 
 | ID        | Kebutuhan                                                                                                                                                          |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| FR-REP-01 | Pengguna memilih bulan dan properti (atau "Semua properti" untuk owner). Default: bulan berjalan                                                                   |
+| FR-REP-01 | Pengguna memilih bulan dan properti ("Semua properti" untuk owner, "Semua properti saya" untuk pengelola). Default: bulan berjalan dan semua properti                                                                   |
 | FR-REP-02 | Bagian **Kamar**: daftar kamar dan statusnya, plus ringkasan jumlah terisi, kosong, rusak                                                                          |
 | FR-REP-03 | Bagian **Penghuni dan pembayaran**: daftar penghuni aktif dengan kamar, jatuh tempo, nominal tagihan, status bayar, dan tanggal bayar                              |
 | FR-REP-04 | Bagian **Pemasukan**: total tagihan jatuh tempo bulan itu, **sudah masuk** (tagihan `PAID`), dan **belum masuk** (`UNPAID`, termasuk yang terlambat) **[PUTUSAN]** |
@@ -527,7 +529,7 @@ Aturan perhitungan **[ASUMSI]**:
 | Layar                                 | Isi utama                                                                                                           | Owner | Pengelola   |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----- | ----------- |
 | Login dan ubah kata sandi             | Username, kata sandi                                                                                                | Ya    | Ya          |
-| Dashboard                             | Widget 7.12 dan pemilih properti                                                                                    | Ya    | Ya          |
+| Dashboard                             | Widget 7.12 dan filter properti                                                                                    | Ya    | Ya          |
 | Kamar (daftar)                        | Tabel dan kartu kamar, filter status                                                                                | Ya    | Ya          |
 | Kamar (detail/form)                   | Data kamar, tenant aktif, asset, meteran, tiket                                                                     | Ya    | Ya          |
 | Tenant (daftar)                       | Cari, filter, status pembayaran                                                                                     | Ya    | Ya          |
@@ -695,7 +697,7 @@ Default dipakai supaya coding tidak terhenti. Semua bisa diubah setelah ada kepu
 | No  | Pertanyaan                                                                            | Default sementara untuk coding                                                                                                       |
 | --- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | 1   | Listrik penyewa: tarif per kWh atau flat per bulan?                                   | Dukung **dua-duanya** lewat field `electricity_billing_method`                                                                       |
-| 2   | Apakah satu pengelola bisa memegang beberapa properti?                                | Model data **mendukung** banyak-ke-banyak, antarmuka punya pemilih properti                                                          |
+| 2   | Apakah satu pengelola bisa memegang beberapa properti?                                | Model data **mendukung** banyak-ke-banyak, antarmuka punya filter properti per halaman, termasuk "Semua properti saya"             |
 | 3   | Perlu deposit dan perhitungan saat keluar?                                            | **Tidak ada** di fase 1. Struktur dibiarkan longgar                                                                                  |
 | 4   | Listrik terakhir saat tenant keluar: dicatat dan ditagihkan bagaimana?                | Dihitung **manual** oleh pengelola dan dimasukkan sebagai baris `OTHER` pada tagihan terakhir (FR-INV-06, FR-OUT-04)                 |
 | 5   | Apakah metode pembayaran (transfer, tunai, e-wallet) perlu dicatat selain foto bukti? | Field `payment_method` **tersedia tetapi opsional**                                                                                  |

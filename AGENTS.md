@@ -89,7 +89,8 @@ Alur satu arah: controller → service → repository. Service melempar `NotFoun
 - Nama berkas backend `<fitur>.<lapisan>.ts`. Frontend per fitur: `components/<fitur>/`, `lib/<fitur>/{hooks,index.ts,types.ts}`, komponen khusus satu halaman di `_components/` halaman itu.
 - Skema Zod di `shared/schemas/<fitur>.ts` dipakai form dan controller. Dilarang `any` dan `@ts-ignore` tanpa alasan tertulis.
 - Pembungkus hook per fitur (`useInvoices`, `useMarkInvoicePaid`) mengurus invalidasi cache. Komponen tidak memanggil `trpc.*` langsung.
-- Menu dan fitur mengikuti pengaturan properti (BR-16).
+- Menu dan fitur mengikuti pengaturan properti (BR-16): menu bersyarat tampil bila minimal satu properti yang dapat diakses mengaktifkannya.
+- Cakupan properti ditentukan oleh filter di halaman (`?properti=ID`), bukan pemilih global (PRD FR-PRO-02). Formulir pembuatan selalu menanyakan properti secara eksplisit.
 - Tabel besar: paginasi, pencarian, dan filter di server. Mobile-first, pengelola bekerja lewat HP.
 - Commit kecil: `type(scope): ringkasan`. Satu cabang per milestone.
 - Log memakai `pino` dengan `layer`, `module`, dan `requestId`. Jangan mencatat NIK, telepon, atau kata sandi.

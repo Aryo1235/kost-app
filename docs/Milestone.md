@@ -30,6 +30,7 @@ Letakkan di `docs/MILESTONES.md`. Berkas ini adalah daftar kerja dan kumpulan pr
 - Pemilihan meteran di form kamar dan kewajiban meteran pada pengeluaran listrik diaktifkan di **M4**.
 - Pemicu pembuatan tagihan saat Dashboard dibuka ditambahkan di **M7**.
 - Detail kamar bertambah bertahap: tenant (M2), asset dan tiket (M5), riwayat meteran (M4).
+- Cakupan properti: filter di tiap halaman daftar (PRD FR-PRO-02, `?properti=ID`), bukan pemilih global di navbar. Formulir pembuatan selalu menanyakan properti secara eksplisit.
 
 ## Penutup yang sama di semua prompt
 
@@ -311,7 +312,7 @@ Lingkup:
 - Biaya ke PLN (FR-ELC-07 dan 08): form catat token atau tagihan PLN per meteran membuat
   pengeluaran kategori Listrik dengan meter_id. Aktifkan kewajiban meteran pada pengeluaran Listrik
   (FR-EXP-03) dan beri label per jenis meteran.
-- Halaman Listrik hanya tampil jika properti mengaktifkan listrik dikelola aplikasi (BR-16).
+- Menu Listrik tampil jika minimal satu properti yang dapat diakses mengaktifkan listrik dikelola aplikasi (BR-16). Halaman Listrik hanya memuat properti yang mengaktifkannya.
   Ringkasan per meteran dan per label (FR-ELC-13). Riwayat meteran di detail kamar.
 - Pola A sampai E di Lampiran C mengisi nilai awal saat properti dibuat.
 - Seed: properti contoh untuk tiap pola A sampai E.

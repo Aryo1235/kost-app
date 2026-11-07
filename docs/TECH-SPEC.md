@@ -345,13 +345,13 @@ Indeks tabel domain diawali `organization_id`, misalnya `(organization_id, prope
 ### 6.3 Tabel
 
 - TanStack Table dengan **paginasi, pencarian, dan filter di server** (PRD: properti hingga 500 kamar, halaman daftar kurang dari 2 detik).
-- Filter disimpan di URL. Properti aktif disimpan di cookie.
+- Filter disimpan di URL, termasuk filter properti (`?properti=ID`). Tidak ada properti aktif global di cookie atau penyimpanan lain: cakupan properti ditentukan per halaman (PRD FR-PRO-02).
 
 ### 6.4 Bahasa dan penamaan
 
 - Kode, nama tabel, variabel, pesan commit: **bahasa Inggris**. Teks yang dilihat pengguna: **bahasa Indonesia**, tanpa pustaka i18n.
 - URL memakai bahasa Indonesia: `/dashboard`, `/properti`, `/kamar`, `/tenant`, `/tagihan`, `/listrik`, `/asset`, `/maintenance`, `/pengeluaran`, `/laporan`, `/audit-log`, `/pengaturan`, `/pengguna`, `/akun` (ubah kata sandi sendiri).
-- Menu dan fitur disembunyikan sesuai pengaturan properti (BR-16): tanpa fasum tidak ada menu Fasum, listrik tidak dikelola berarti tidak ada menu Listrik.
+- Menu dan fitur disembunyikan sesuai pengaturan properti (BR-16): menu bersyarat (Fasum, Listrik) tampil bila minimal satu properti yang dapat diakses pengguna mengaktifkannya. Di dalam halaman, filter hanya menawarkan properti yang mengaktifkannya.
 
 ---
 
