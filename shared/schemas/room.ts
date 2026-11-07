@@ -12,7 +12,12 @@ export const roomIdInput = z.object({
 const roomFields = {
   code: z.string().trim().min(1, { error: "REQUIRED" }).max(20),
   roomType: z.string().trim().max(50).optional(),
-  baseRentAmount: z.number().int({ error: "AMOUNT_INVALID" }).min(0, { error: "AMOUNT_INVALID" }).max(MAX_RENT),
+  // Kosong dibedakan dari salah format agar form bisa menulis pesan yang tepat.
+  baseRentAmount: z
+    .number({ error: (issue) => (issue.input === undefined ? "REQUIRED" : "AMOUNT_INVALID") })
+    .int({ error: "AMOUNT_INVALID" })
+    .min(0, { error: "AMOUNT_INVALID" })
+    .max(MAX_RENT, { error: "AMOUNT_INVALID" }),
   facilities: z.string().trim().max(300).optional(),
   // OCCUPIED lolos skema tetapi ditolak aturan domain: diatur otomatis saat tenant masuk (M2).
   status: z.enum(ROOM_STATUSES).optional(),
