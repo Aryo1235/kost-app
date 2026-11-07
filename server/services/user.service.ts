@@ -2,7 +2,13 @@ import type { AuthService } from "@/server/auth/auth.service";
 import { AuthRepository } from "@/server/auth/auth.repository";
 import { hashPassword } from "@/server/auth/password";
 import type { Db } from "@/server/db/client";
-import { BusinessRuleError, ConflictError, ForbiddenError, NotFoundError } from "@/server/errors";
+import {
+  BusinessRuleError,
+  ConflictError,
+  ForbiddenError,
+  isUniqueViolation,
+  NotFoundError,
+} from "@/server/errors";
 import { PropertyRepository } from "@/server/repositories/property.repository";
 import { UserRepository, type UserRow } from "@/server/repositories/user.repository";
 import type { Scope } from "@/server/scope";
@@ -18,10 +24,6 @@ type CreateUserInput = {
 
 function requireOwner(scope: Scope): void {
   if (scope.role !== "OWNER") throw new ForbiddenError();
-}
-
-function isUniqueViolation(err: unknown): boolean {
-  return typeof err === "object" && err !== null && "code" in err && err.code === "23505";
 }
 
 // Pengelolaan akun pengelola oleh owner (FR-AUTH-03, FR-AUTH-05, FR-AUTH-07).

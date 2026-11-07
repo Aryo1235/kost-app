@@ -1,11 +1,13 @@
 import { authRouter } from "@/server/controllers/auth.controller";
 import { propertyRouter } from "@/server/controllers/property.controller";
+import { roomRouter } from "@/server/controllers/room.controller";
 import { userRouter } from "@/server/controllers/user.controller";
 import { router } from "./init";
 
 export const appRouter = router({
   auth: authRouter,
   property: propertyRouter,
+  room: roomRouter,
   user: userRouter,
 });
 

@@ -1,10 +1,19 @@
 import { services } from "@/server/services";
 import { router } from "@/server/trpc/init";
 import { orgProcedure, ownerProcedure, propertyProcedure } from "@/server/trpc/procedures";
-import { createPropertyInput, updatePropertyInput } from "@/shared/schemas/property";
+import {
+  createPropertyInput,
+  propertyListInput,
+  setPropertyActiveInput,
+  updatePropertyInput,
+} from "@/shared/schemas/property";
 
 export const propertyRouter = router({
-  list: orgProcedure.query(({ ctx }) => services.property.list(ctx.scope)),
+  list: orgProcedure
+    .input(propertyListInput)
+    .query(({ ctx, input }) =>
+      services.property.list(ctx.scope, { includeInactive: input?.includeInactive }),
+    ),
 
   get: propertyProcedure.query(({ ctx, input }) =>
     services.property.get(ctx.scope, input.propertyId),
@@ -17,4 +26,10 @@ export const propertyRouter = router({
   update: ownerProcedure
     .input(updatePropertyInput)
     .mutation(({ ctx, input }) => services.property.update(ctx.scope, input)),
+
+  setActive: ownerProcedure
+    .input(setPropertyActiveInput)
+    .mutation(({ ctx, input }) =>
+      services.property.setActive(ctx.scope, input.propertyId, input.isActive),
+    ),
 });

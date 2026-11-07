@@ -7,6 +7,7 @@ import {
   RateLimitedError,
   UnauthorizedError,
 } from "@/server/errors";
+import { isUniqueViolation } from "@/server/errors";
 import { childLogger } from "@/server/logger";
 import { systemScope, type Scope } from "@/server/scope";
 import { AuditService } from "@/server/services/audit.service";
@@ -70,10 +71,6 @@ function toAuthUser(row: UserRow): AuthUser {
     role: row.role,
     mustChangePassword: row.mustChangePassword,
   };
-}
-
-function isUniqueViolation(err: unknown): boolean {
-  return typeof err === "object" && err !== null && "code" in err && err.code === "23505";
 }
 
 export class AuthService {

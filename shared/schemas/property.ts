@@ -35,3 +35,7 @@ export const updatePropertyInput = propertyIdInput.extend({
 export const setPropertyActiveInput = propertyIdInput.extend({
   isActive: z.boolean(),
 });
+
+export const propertyListInput = z
+  .object({ includeInactive: z.boolean().optional() })
+  .optional();

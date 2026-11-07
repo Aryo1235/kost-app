@@ -68,3 +68,16 @@ export function toErrorResponse(err: unknown): NextResponse {
   }
   return NextResponse.json({ code: "INTERNAL_ERROR" }, { status: 500 });
 }
+
+// Galat unik dari PostgreSQL (23505). Drizzle membungkus galat driver, jadi kodenya juga dicek di cause.
+export function isUniqueViolation(err: unknown): boolean {
+  const codeOf = (value: unknown): unknown =>
+    typeof value === "object" && value !== null && "code" in value
+      ? (value as { code?: unknown }).code
+      : undefined;
+  const cause =
+    typeof err === "object" && err !== null && "cause" in err
+      ? (err as { cause?: unknown }).cause
+      : undefined;
+  return codeOf(err) === "23505" || codeOf(cause) === "23505";
+}
