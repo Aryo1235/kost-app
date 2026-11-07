@@ -34,7 +34,7 @@ import {
   useUpdateProperty,
 } from "@/lib/property/hooks";
 import type { PropertyRow } from "@/lib/property/types";
-import { ELECTRICITY_PATTERNS } from "@/shared/enums";
+import { ELECTRICITY_PATTERN_OPTIONS } from "@/shared/enums";
 import { createPropertyInput } from "@/shared/schemas/property";
 
 type PropertyFormInput = z.input<typeof createPropertyInput>;
@@ -122,7 +122,7 @@ function PropertyFormDialog({ property }: { property?: PropertyRow }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{property ? `Ubah ${property.name}` : "Tambah properti"}</DialogTitle>
-          <DialogDescription>Fasum dan pola listrik menentukan menu yang tampil untuk properti ini.</DialogDescription>
+          <DialogDescription>Pola listrik menentukan siapa yang membayar PLN dan apakah biayanya ditagihkan ke penyewa.</DialogDescription>
         </DialogHeader>
         {/* Form dipasang ulang setiap dialog dibuka, jadi isiannya selalu dari data terbaru. */}
         <PropertyForm property={property} onDone={() => setOpen(false)} />
@@ -148,7 +148,9 @@ function defaultsFor(property?: PropertyRow): PropertyFormInput {
     notes: property.notes ?? "",
     hasFacilities: property.hasFacilities,
     electricityManaged: property.electricityManaged,
-    electricityPattern: property.electricityPattern,
+    // Pola lama CUSTOM (BR-17) tidak bisa dipilih lagi: form kosong dan pengguna memilih pola A sampai E.
+    electricityPattern:
+      property.electricityPattern === "CUSTOM" ? undefined : property.electricityPattern,
   };
 }
 
@@ -198,7 +200,10 @@ function PropertyForm({ property, onDone }: { property?: PropertyRow; onDone: ()
       >
         {(c) => (
           <NativeSelect {...c} {...register("electricityPattern")}>
-            {ELECTRICITY_PATTERNS.map((p) => (
+            <option value="" disabled>
+              Pilih pola
+            </option>
+            {ELECTRICITY_PATTERN_OPTIONS.map((p) => (
               <option key={p} value={p}>
                 {ELECTRICITY_PATTERN_LABELS[p].label}
               </option>
@@ -228,7 +233,7 @@ function PropertyForm({ property, onDone }: { property?: PropertyRow; onDone: ()
             <SwitchRow
               id="property-electricity"
               label="Listrik dikelola aplikasi"
-              hint="Pola A tidak dikelola. Pola B sampai E dikelola. Pilih Lainnya untuk mengatur sendiri."
+              hint="Pola A tidak dikelola aplikasi. Pola B sampai E dikelola aplikasi."
               checked={field.value === true}
               onCheckedChange={field.onChange}
             />

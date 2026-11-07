@@ -103,7 +103,7 @@ export async function seedDevData(options: { large?: boolean } = {}): Promise<Se
       address: "Jl. Contoh No. 4, Depok",
       hasFacilities: false,
       electricityManaged: true,
-      electricityPattern: "CUSTOM",
+      electricityPattern: "D",
     });
     for (const room of roomSeeds(300, "L", 3, 800_000, 25)) {
       await services.room.create(scopeA, { propertyId: besar.id, ...room });

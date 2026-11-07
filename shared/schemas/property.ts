@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ELECTRICITY_PATTERNS } from "@/shared/enums";
+import { ELECTRICITY_PATTERN_OPTIONS } from "@/shared/enums";
 
 export const propertyIdInput = z.object({
   propertyId: z.number().int().positive(),
@@ -11,7 +11,7 @@ const address = z.string().trim().min(1, { error: "REQUIRED" }).max(300);
 const notes = z.string().trim().max(1000).optional();
 const hasFacilities = z.boolean();
 const electricityManaged = z.boolean();
-const electricityPattern = z.enum(ELECTRICITY_PATTERNS);
+const electricityPattern = z.enum(ELECTRICITY_PATTERN_OPTIONS);
 
 // Saat membuat, pengaturan diisi bawaan: tanpa fasum, listrik tidak dikelola, pola A (Lampiran C).
 export const createPropertyInput = z.object({

@@ -17,7 +17,7 @@ const MESSAGES: Record<string, string> = {
   ROOM_HAS_TENANT: "Kamar masih ditempati. Keluarkan penghuni dulu.",
   PROPERTY_INACTIVE: "Properti ini nonaktif. Aktifkan dulu untuk menambah kamar.",
   PATTERN_MANAGED_MISMATCH: "Pola listrik tidak sesuai dengan pengaturan listrik dikelola.",
-  AMOUNT_INVALID: "Nominal harus bilangan bulat, tidak negatif.",
+  AMOUNT_INVALID: "Nominal harus lebih dari 0.",
   PROPERTY_NOT_FOUND: "Properti tidak ditemukan.",
   USER_NOT_FOUND: "Pengguna tidak ditemukan.",
   TARGET_NOT_MANAGER: "Hanya akun pengelola yang bisa diubah di sini.",

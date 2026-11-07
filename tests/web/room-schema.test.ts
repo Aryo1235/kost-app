@@ -6,9 +6,15 @@ const base = { propertyId: 1, code: "A-01", baseRentAmount: 1_000_000 };
 
 // Skema kamar dipakai form dan server. Pesan galat berupa kode, lalu dipetakan ke kalimat di lib/errors.ts.
 describe("skema kamar: harga sewa", () => {
-  it("bilangan bulat dan tidak negatif diterima, termasuk nol", () => {
+  it("bilangan bulat lebih dari 0 diterima", () => {
     expect(createRoomInput.safeParse(base).success).toBe(true);
-    expect(createRoomInput.safeParse({ ...base, baseRentAmount: 0 }).success).toBe(true);
+    expect(createRoomInput.safeParse({ ...base, baseRentAmount: 1 }).success).toBe(true);
+  });
+
+  it("harga nol ditolak AMOUNT_INVALID (design.md 6.4: harus lebih dari 0)", () => {
+    const result = createRoomInput.safeParse({ ...base, baseRentAmount: 0 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues[0]?.message).toBe("AMOUNT_INVALID");
   });
 
   it("harga desimal ditolak AMOUNT_INVALID", () => {

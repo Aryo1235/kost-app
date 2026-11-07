@@ -17,6 +17,8 @@ export type FileKind = (typeof FILE_KINDS)[number];
 
 // Pola listrik siap pilih (PRD Lampiran C). A berarti listrik tidak dikelola aplikasi.
 export const ELECTRICITY_PATTERNS = ["A", "B", "C", "D", "E", "CUSTOM"] as const;
+// Pilihan yang boleh dikirim di fase 1 (BR-17): hanya pola Lampiran C. CUSTOM tinggal di data lama.
+export const ELECTRICITY_PATTERN_OPTIONS = ["A", "B", "C", "D", "E"] as const;
 export type ElectricityPattern = (typeof ELECTRICITY_PATTERNS)[number];
 
 // Status kamar. OCCUPIED diatur otomatis saat tenant masuk (M2), tidak bisa diatur manual.

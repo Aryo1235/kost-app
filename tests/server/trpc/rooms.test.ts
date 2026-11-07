@@ -256,7 +256,7 @@ describe("pengaturan properti", () => {
     const ctx = await sessionFor("owner.a");
     const updated = await caller(ctx).property.update({
       propertyId: s.propA1,
-      electricityPattern: "CUSTOM",
+      electricityPattern: "D",
       hasFacilities: true,
     });
     expect(updated.hasFacilities).toBe(true);

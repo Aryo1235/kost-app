@@ -16,7 +16,7 @@ const roomFields = {
   baseRentAmount: z
     .number({ error: (issue) => (issue.input === undefined ? "REQUIRED" : "AMOUNT_INVALID") })
     .int({ error: "AMOUNT_INVALID" })
-    .min(0, { error: "AMOUNT_INVALID" })
+    .min(1, { error: "AMOUNT_INVALID" })
     .max(MAX_RENT, { error: "AMOUNT_INVALID" }),
   facilities: z.string().trim().max(300).optional(),
   // OCCUPIED lolos skema tetapi ditolak aturan domain: diatur otomatis saat tenant masuk (M2).
