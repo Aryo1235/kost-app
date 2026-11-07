@@ -35,18 +35,18 @@ export function pageTitle(pathname: string): string {
   return EXTRA_TITLES[pathname] ?? "Kostra";
 }
 
-// Menu yang ditampilkan untuk peran dan properti yang dipilih (BR-16).
-// Menu ber-syarat disembunyikan bila tidak ada satu properti yang dipilih (mis. "Semua properti").
+// Menu yang ditampilkan untuk peran dan properti yang bisa diakses (BR-16, PRD 0.2).
+// Menu ber-syarat tampil bila minimal satu properti yang bisa diakses mengaktifkannya.
 export function visibleNavItems(
   items: NavItem[],
   viewer: { permissions: Pick<Permissions, "manageUsers"> },
-  property: { electricityManaged: boolean; hasFacilities: boolean } | null,
+  properties: { electricityManaged: boolean; hasFacilities: boolean }[],
 ): NavItem[] {
   return items.filter((item) => {
     if (item.ownerOnly && !viewer.permissions.manageUsers) return false;
     if (item.requires) {
-      if (!property) return false;
-      return property[item.requires];
+      const requirement = item.requires;
+      return properties.some((p) => p[requirement]);
     }
     return true;
   });

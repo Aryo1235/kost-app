@@ -1,8 +1,8 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
+import { Building2, EllipsisVertical } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import { SettingsSection } from "@/components/shared/settings-section";
 import { StatStrip } from "@/components/shared/stat-strip";
@@ -66,7 +66,14 @@ export function RoomDetailView({ roomId }: { roomId: number }) {
     <section className="flex flex-col gap-6">
       <PageHeader
         title={`Kamar ${data.code}`}
-        description={propertyName}
+        description={
+          propertyName ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Building2 aria-hidden className="size-4" />
+              {propertyName}
+            </span>
+          ) : undefined
+        }
         actions={
           <>
             <Button variant="outline" asChild>
@@ -105,6 +112,19 @@ export function RoomDetailView({ roomId }: { roomId: number }) {
 
       <SettingsSection title="Data kamar" description="Diisi di form ubah.">
         <dl className="divide-y divide-border">
+          <DetailRow
+            label="Properti"
+            value={
+              propertyName ? (
+                <Link
+                  href={`/kamar?properti=${data.propertyId}`}
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  {propertyName}
+                </Link>
+              ) : null
+            }
+          />
           <DetailRow label="Tipe kamar" value={data.roomType} />
           <DetailRow label="Fasilitas kamar" value={data.facilities} />
           <DetailRow label="Catatan" value={data.notes} />
@@ -117,7 +137,7 @@ export function RoomDetailView({ roomId }: { roomId: number }) {
 }
 
 // Satu baris label-nilai (design.md 6.18). Di HP label di atas nilai. Nilai kosong ditulis "–" (6.13).
-function DetailRow({ label, value }: { label: string; value: string | null }) {
+function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="grid gap-1 px-6 py-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-4">
       <dt className="text-sm text-muted-foreground">{label}</dt>

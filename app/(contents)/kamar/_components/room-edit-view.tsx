@@ -1,5 +1,6 @@
 "use client";
 
+import { Building2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { RoomEditForm } from "@/components/room/room-form";
 import { codeFromError, errorMessage } from "@/lib/errors";
@@ -31,8 +32,18 @@ export function RoomEditView({ roomId }: { roomId: number }) {
 
   return (
     <section className="flex flex-col gap-6">
-      <PageHeader title={`Ubah kamar ${room.data.code}`} description={propertyName} />
-      <RoomEditForm room={room.data} />
+      <PageHeader
+        title={`Ubah kamar ${room.data.code}`}
+        description={
+          propertyName ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Building2 aria-hidden className="size-4" />
+              {propertyName}
+            </span>
+          ) : undefined
+        }
+      />
+      <RoomEditForm room={room.data} propertyName={propertyName ?? "–"} />
     </section>
   );
 }

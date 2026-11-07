@@ -1,14 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
-import type { z } from "zod";
+import { z } from "zod";
 import { FormField } from "@/components/shared/form-field";
 import { MoneyInput } from "@/components/shared/money-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { codeFromError, errorMessage, fieldErrorMessage } from "@/lib/errors";
@@ -18,12 +20,25 @@ import type { RoomDetail } from "@/lib/room/types";
 import type { RoomStatus } from "@/shared/enums";
 import { createRoomInput } from "@/shared/schemas/room";
 
-// Form kamar memakai skema yang sama dengan server; propertyId dibawa dari halaman (design.md 1.3: halaman penuh).
-const formSchema = createRoomInput.omit({ propertyId: true });
+// Form kamar memakai skema yang sama dengan server. Properti selalu ditanyakan di form (design.md 6.20, 6.22).
+const formSchema = createRoomInput.extend({
+  propertyId: z
+    .number({ error: "REQUIRED" })
+    .int({ error: "REQUIRED" })
+    .positive({ error: "REQUIRED" }),
+});
 type RoomFormInput = z.input<typeof formSchema>;
 
-function defaultsFor(room?: RoomDetail): Partial<RoomFormInput> {
+export type PropertyChoice = { id: number; name: string };
+
+// Cara properti tampil di form: dipilih, atau baca-saja (hanya satu properti, atau saat ubah).
+type PropertyField =
+  | { kind: "choose"; options: PropertyChoice[] }
+  | { kind: "fixed"; name: string; hint?: string };
+
+function defaultsFor(propertyId: number | undefined, room?: RoomDetail): Partial<RoomFormInput> {
   return {
+    propertyId,
     code: room?.code ?? "",
     roomType: room?.roomType ?? "",
     baseRentAmount: room?.baseRentAmount,
@@ -34,18 +49,27 @@ function defaultsFor(room?: RoomDetail): Partial<RoomFormInput> {
 }
 
 // Kamar baru: pengelola dan owner sama-sama bisa mengisi (PRD 2.2).
-export function RoomCreateForm({ propertyId }: { propertyId: number }) {
+// Nilai awal properti dari `?properti=ID`. Bila pengguna hanya punya satu properti, tampil baca-saja.
+export function RoomCreateForm({
+  properties,
+  initialPropertyId,
+}: {
+  properties: PropertyChoice[];
+  initialPropertyId?: number;
+}) {
   const router = useRouter();
   const create = useCreateRoom();
+  const only = properties.length === 1 ? properties[0] : undefined;
+  const initial =
+    only?.id ?? (properties.some((p) => p.id === initialPropertyId) ? initialPropertyId : undefined);
   const form = useForm<RoomFormInput>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultsFor(),
+    defaultValues: defaultsFor(initial),
   });
 
   async function onSubmit(values: RoomFormInput) {
     try {
       const created = await create.mutateAsync({
-        propertyId,
         ...values,
         roomType: values.roomType || undefined,
         facilities: values.facilities || undefined,
@@ -63,25 +87,27 @@ export function RoomCreateForm({ propertyId }: { propertyId: number }) {
       onSubmit={onSubmit}
       pending={create.isPending}
       failure={create.error}
+      propertyField={only ? { kind: "fixed", name: only.name } : { kind: "choose", options: properties }}
       statuses={["AVAILABLE", "BROKEN"]}
       submitLabel="Simpan kamar"
-      cancelHref="/kamar"
+      cancelHref={initial ? `/kamar?properti=${initial}` : "/kamar"}
     />
   );
 }
 
-// Ubah kamar yang sudah ada. Hapus memakai hapus lunak (BR-14) dan tetap dicatat di audit.
-export function RoomEditForm({ room }: { room: RoomDetail }) {
+// Ubah kamar yang sudah ada. Properti tidak bisa diganti: kamar tidak dipindah antar properti (fase 1).
+export function RoomEditForm({ room, propertyName }: { room: RoomDetail; propertyName: string }) {
   const router = useRouter();
   const update = useUpdateRoom();
   const form = useForm<RoomFormInput>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultsFor(room),
+    defaultValues: defaultsFor(room.propertyId, room),
   });
 
   async function onSubmit(values: RoomFormInput) {
     try {
-      await update.mutateAsync({ roomId: room.id, ...values });
+      // propertyId ikut terkirim tetapi dibuang oleh skema ubah di server.
+      await update.mutateAsync({ ...values, roomId: room.id });
       router.push(`/kamar/${room.id}`);
     } catch {
       // Galat ditampilkan di bawah lewat update.error.
@@ -98,6 +124,11 @@ export function RoomEditForm({ room }: { room: RoomDetail }) {
       onSubmit={onSubmit}
       pending={update.isPending}
       failure={update.error}
+      propertyField={{
+        kind: "fixed",
+        name: propertyName,
+        hint: "Kamar tidak bisa dipindah ke properti lain.",
+      }}
       statuses={statuses}
       submitLabel="Simpan perubahan"
       cancelHref={`/kamar/${room.id}`}
@@ -110,6 +141,7 @@ function RoomFormShell({
   onSubmit,
   pending,
   failure,
+  propertyField,
   statuses,
   submitLabel,
   cancelHref,
@@ -118,6 +150,7 @@ function RoomFormShell({
   onSubmit: (values: RoomFormInput) => Promise<void>;
   pending: boolean;
   failure: unknown;
+  propertyField: PropertyField;
   statuses: RoomStatus[];
   submitLabel: string;
   cancelHref: string;
@@ -128,10 +161,46 @@ function RoomFormShell({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
       <div className="grid gap-5 rounded-xl border border-border bg-card p-6 md:grid-cols-2">
+        {propertyField.kind === "choose" ? (
+          <FormField
+            id="room-property"
+            label="Properti"
+            className="md:col-span-2"
+            error={fieldErrorMessage(errors.propertyId?.message)}
+          >
+            {(c) => (
+              <NativeSelect
+                {...c}
+                {...register("propertyId", {
+                  setValueAs: (v: string) => (v === "" || v == null ? undefined : Number(v)),
+                })}
+              >
+                <option value="">Pilih properti</option>
+                {propertyField.options.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            )}
+          </FormField>
+        ) : (
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <Label>Properti</Label>
+            <p className="flex h-11 items-center gap-2 rounded-md border border-border bg-muted px-3 text-sm font-medium md:h-10">
+              <Building2 aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+              {propertyField.name}
+            </p>
+            {propertyField.hint ? (
+              <p className="text-[13px] text-muted-foreground">{propertyField.hint}</p>
+            ) : null}
+          </div>
+        )}
+
         <FormField
           id="room-code"
           label="Kode kamar"
-          hint="Unik di dalam properti. Huruf besar dan kecil dianggap sama."
+          hint="Unik di dalam properti yang dipilih. Huruf besar dan kecil dianggap sama."
           error={fieldErrorMessage(errors.code?.message)}
         >
           {(c) => <Input {...c} autoComplete="off" {...register("code")} />}

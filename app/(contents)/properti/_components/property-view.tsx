@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2 } from "lucide-react";
+import { Building2, ChevronRight, EllipsisVertical } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
@@ -20,6 +21,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
@@ -83,8 +90,19 @@ export function PropertyView() {
   );
 }
 
+// Satu baris fakta jumlah kamar, dihitung server (AGENTS aturan 6).
+function roomSummary(p: PropertyRow): string {
+  if (p.roomCount === 0) return "Belum ada kamar";
+  const parts = [`${p.roomCount} kamar`];
+  if (p.availableCount > 0) parts.push(`${p.availableCount} kosong`);
+  if (p.occupiedCount > 0) parts.push(`${p.occupiedCount} terisi`);
+  if (p.brokenCount > 0) parts.push(`${p.brokenCount} rusak`);
+  return parts.join(" · ");
+}
+
 function PropertyItem({ property: p, canManage }: { property: PropertyRow; canManage: boolean }) {
   const pattern = ELECTRICITY_PATTERN_LABELS[p.electricityPattern];
+  const [activeOpen, setActiveOpen] = useState(false);
   return (
     <li className="flex flex-col gap-3 px-6 py-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -92,12 +110,38 @@ function PropertyItem({ property: p, canManage }: { property: PropertyRow; canMa
           <p className="font-medium">{p.name}</p>
           <p className="text-sm text-muted-foreground">{p.address}</p>
         </div>
-        {canManage ? (
-          <div className="flex flex-wrap gap-2">
-            <PropertyFormDialog property={p} />
-            <PropertyActiveDialog property={p} />
-          </div>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {canManage ? <PropertyFormDialog property={p} /> : null}
+          {canManage || p.isActive ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={`Aksi ${p.name}`}
+                  className="!size-11 md:!size-10"
+                >
+                  <EllipsisVertical aria-hidden />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {p.isActive ? (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/kamar/baru?properti=${p.id}`}>Tambah kamar</Link>
+                  </DropdownMenuItem>
+                ) : null}
+                {canManage ? (
+                  <DropdownMenuItem
+                    className={p.isActive ? "!text-danger" : undefined}
+                    onSelect={() => setActiveOpen(true)}
+                  >
+                    {p.isActive ? "Nonaktifkan" : "Aktifkan"}
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+        </div>
       </div>
       <div className="flex flex-wrap gap-2">
         {p.isActive ? null : <StatusBadge label="Nonaktif" tone="neutral" />}
@@ -108,6 +152,14 @@ function PropertyItem({ property: p, canManage }: { property: PropertyRow; canMa
         />
         <StatusBadge label={pattern.label} tone="neutral" />
       </div>
+      <Link
+        href={`/kamar?properti=${p.id}`}
+        className="num inline-flex w-fit items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+      >
+        {roomSummary(p)}
+        <ChevronRight aria-hidden className="size-4" />
+      </Link>
+      {canManage ? <PropertyActiveDialog property={p} open={activeOpen} onOpenChange={setActiveOpen} /> : null}
     </li>
   );
 }
@@ -293,15 +345,23 @@ function SwitchRow({
 }
 
 // Nonaktifkan dan aktifkan properti (FR-PRO-03). Konfirmasi ringan: satu kalimat dampak (design.md 6.9).
-function PropertyActiveDialog({ property }: { property: PropertyRow }) {
-  const [open, setOpen] = useState(false);
+// Dibuka dari menu ⋯ baris properti, jadi status buka dikendalikan pemanggil.
+function PropertyActiveDialog({
+  property,
+  open,
+  onOpenChange,
+}: {
+  property: PropertyRow;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const setActive = useSetPropertyActive();
   const nextActive = !property.isActive;
 
   async function onConfirm() {
     try {
       await setActive.mutateAsync({ propertyId: property.id, isActive: nextActive });
-      setOpen(false);
+      onOpenChange(false);
     } catch {
       // Galat ditampilkan di bawah lewat setActive.error.
     }
@@ -311,15 +371,10 @@ function PropertyActiveDialog({ property }: { property: PropertyRow }) {
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        setOpen(next);
+        onOpenChange(next);
         if (!next) setActive.reset();
       }}
     >
-      <DialogTrigger asChild>
-        <Button variant="outline" className={nextActive ? undefined : "!text-danger"}>
-          {nextActive ? "Aktifkan" : "Nonaktifkan"}
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -327,8 +382,8 @@ function PropertyActiveDialog({ property }: { property: PropertyRow }) {
           </DialogTitle>
           <DialogDescription>
             {nextActive
-              ? "Properti kembali muncul di pemilih dan kamar baru bisa ditambahkan."
-              : "Properti hilang dari pemilih dan kamar baru tidak bisa ditambahkan. Data kamar tetap tersimpan."}
+              ? "Properti kembali muncul di filter dan kamar baru bisa ditambahkan."
+              : "Properti hilang dari filter dan kamar baru tidak bisa ditambahkan. Data kamar tetap tersimpan."}
           </DialogDescription>
         </DialogHeader>
         {setActive.isError ? (

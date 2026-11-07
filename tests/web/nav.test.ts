@@ -13,30 +13,34 @@ const items: NavItem[] = [
 const owner = { permissions: { manageUsers: true } };
 const manager = { permissions: { manageUsers: false } };
 
-describe("BR-16: menu mengikuti pengaturan properti", () => {
-  it("menu listrik hanya tampil bila listrik dikelola", () => {
-    const managed = { electricityManaged: true, hasFacilities: false };
-    const unmanaged = { electricityManaged: false, hasFacilities: false };
-    expect(visibleNavItems(items, owner, managed).map((i) => i.href)).toContain("/listrik");
-    expect(visibleNavItems(items, owner, unmanaged).map((i) => i.href)).not.toContain("/listrik");
+const managed = { electricityManaged: true, hasFacilities: false };
+const unmanaged = { electricityManaged: false, hasFacilities: false };
+const withFacilities = { electricityManaged: false, hasFacilities: true };
+
+describe("BR-16: menu mengikuti pengaturan properti yang bisa diakses", () => {
+  it("menu listrik tampil bila minimal satu properti mengelola listrik", () => {
+    expect(visibleNavItems(items, owner, [unmanaged, managed]).map((i) => i.href)).toContain("/listrik");
+    expect(visibleNavItems(items, owner, [managed]).map((i) => i.href)).toContain("/listrik");
   });
 
-  it("menu fasum hanya tampil bila properti punya fasum", () => {
-    const withFacilities = { electricityManaged: false, hasFacilities: true };
-    const without = { electricityManaged: false, hasFacilities: false };
-    expect(visibleNavItems(items, owner, withFacilities).map((i) => i.href)).toContain("/fasum");
-    expect(visibleNavItems(items, owner, without).map((i) => i.href)).not.toContain("/fasum");
+  it("menu listrik hilang bila tidak ada properti yang mengelola listrik", () => {
+    expect(visibleNavItems(items, owner, [unmanaged, withFacilities]).map((i) => i.href)).not.toContain("/listrik");
   });
 
-  it("tanpa satu properti yang dipilih, menu ber-syarat disembunyikan", () => {
-    const hrefs = visibleNavItems(items, owner, null).map((i) => i.href);
+  it("menu fasum tampil bila minimal satu properti punya fasum", () => {
+    expect(visibleNavItems(items, owner, [unmanaged, withFacilities]).map((i) => i.href)).toContain("/fasum");
+    expect(visibleNavItems(items, owner, [unmanaged, managed]).map((i) => i.href)).not.toContain("/fasum");
+  });
+
+  it("tanpa properti, menu ber-syarat disembunyikan dan menu biasa tetap ada", () => {
+    const hrefs = visibleNavItems(items, owner, []).map((i) => i.href);
     expect(hrefs).not.toContain("/listrik");
     expect(hrefs).not.toContain("/fasum");
     expect(hrefs).toContain("/kamar");
   });
 
   it("pengelola tidak melihat menu khusus owner", () => {
-    const hrefs = visibleNavItems(items, manager, null).map((i) => i.href);
+    const hrefs = visibleNavItems(items, manager, [managed]).map((i) => i.href);
     expect(hrefs).not.toContain("/pengguna");
     expect(hrefs).toContain("/kamar");
   });

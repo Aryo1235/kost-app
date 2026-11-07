@@ -1,6 +1,7 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
+import { Building2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
@@ -15,9 +16,8 @@ import { codeFromError, errorMessage } from "@/lib/errors";
 import { formatRupiah } from "@/lib/format";
 import { useMe } from "@/lib/hooks/useMe";
 import { ROOM_STATUS_LABELS } from "@/lib/labels";
-import { useActiveProperty } from "@/lib/property/active";
+import { parsePropertyParam, resolvePropertyFilter } from "@/lib/property/filter";
 import { useProperties } from "@/lib/property/hooks";
-import { type PropertyOption, resolveSelection } from "@/lib/property/selection";
 import { useRooms } from "@/lib/room/hooks";
 import type { RoomRow } from "@/lib/room/types";
 import type { TableFeatureSet } from "@/lib/table/features";
@@ -42,7 +42,6 @@ export function RoomListView() {
   const searchParams = useSearchParams();
   const me = useMe();
   const properties = useProperties();
-  const active = useActiveProperty();
 
   const q = searchParams.get("q") ?? "";
   const status = parseStatus(searchParams.get("status"));
@@ -76,27 +75,22 @@ export function RoomListView() {
     timer.current = window.setTimeout(() => update({ q: value.trim(), page: null }), 300);
   }
 
-  const options: PropertyOption[] = (properties.data ?? []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    electricityManaged: p.electricityManaged,
-    hasFacilities: p.hasFacilities,
-  }));
+  // Cakupan properti ditentukan oleh filter di halaman ini (`?properti=ID`), bukan pilihan global (design.md 6.16).
+  const options = (properties.data ?? []).map((p) => ({ id: p.id, name: p.name }));
   const ready = me.data !== undefined && properties.data !== undefined;
   const isOwner = me.data?.role === "OWNER";
-  const selection = resolveSelection(active, options, isOwner);
-  const selectedId = selection.kind === "one" ? selection.property.id : undefined;
-  const showProperty = selection.kind === "all";
+  const filter = resolvePropertyFilter(parsePropertyParam(searchParams.get("properti")), options, isOwner);
+  const showProperty = filter.multiple;
 
   const rooms = useRooms({
-    propertyId: selectedId,
+    propertyId: filter.selectedId,
     search: q || undefined,
     status,
     page,
     pageSize: PAGE_SIZE,
   });
 
-  const filtered = q !== "" || status !== undefined;
+  const filtered = q !== "" || status !== undefined || (filter.show && filter.selectedId !== undefined);
   const hasProperties = options.length > 0;
 
   let emptyTitle = "Belum ada kamar";
@@ -108,14 +102,17 @@ export function RoomListView() {
     emptyDescription = isOwner
       ? "Tambahkan properti dulu di menu Properti."
       : "Belum ada properti yang ditugaskan kepada Anda. Hubungi owner.";
-  } else if (selection.kind === "one") {
-    emptyDescription = `Tambahkan kamar pertama di ${selection.property.name}.`;
+  } else if (filter.selectedId !== undefined && filter.scopeLabel) {
+    emptyDescription = `Tambahkan kamar pertama di ${filter.scopeLabel}.`;
   } else {
-    emptyDescription = "Pilih satu properti di navbar untuk menambah kamar.";
+    emptyDescription = "Tambahkan kamar pertama lewat tombol Tambah kamar.";
   }
 
-  const headerDescription =
-    selection.kind === "one" ? selection.property.name : selection.kind === "all" ? "Semua properti" : undefined;
+  const addHref = filter.selectedId !== undefined ? `/kamar/baru?properti=${filter.selectedId}` : "/kamar/baru";
+  const clearFilters = () => {
+    setDraft("");
+    update({ q: null, status: null, properti: null, page: null });
+  };
 
   const columns = roomColumns(showProperty);
 
@@ -123,11 +120,18 @@ export function RoomListView() {
     <section className="flex flex-col gap-6">
       <PageHeader
         title="Kamar"
-        description={headerDescription}
+        description={
+          filter.scopeLabel ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Building2 aria-hidden className="size-4" />
+              {filter.scopeLabel}
+            </span>
+          ) : undefined
+        }
         actions={
-          selection.kind === "one" ? (
+          hasProperties ? (
             <Button asChild>
-              <Link href="/kamar/baru">Tambah kamar</Link>
+              <Link href={addHref}>Tambah kamar</Link>
             </Button>
           ) : null
         }
@@ -147,6 +151,26 @@ export function RoomListView() {
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
+        {filter.show ? (
+          <div className="flex w-full flex-col gap-1.5 md:w-auto md:flex-row md:items-center md:gap-2">
+            <Label htmlFor="room-property-filter" className="text-sm text-muted-foreground">
+              Properti
+            </Label>
+            <NativeSelect
+              id="room-property-filter"
+              className="md:w-52"
+              value={filter.selectedId ?? ""}
+              onChange={(e) => update({ properti: e.target.value, page: null })}
+            >
+              <option value="">{filter.allLabel}</option>
+              {options.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+        ) : null}
         <div className="w-full md:w-44">
           <Label htmlFor="room-status-filter" className="sr-only">
             Filter status
@@ -167,10 +191,7 @@ export function RoomListView() {
         {filtered ? (
           <Button
             variant="ghost"
-            onClick={() => {
-              setDraft("");
-              update({ q: null, status: null, page: null });
-            }}
+            onClick={clearFilters}
           >
             Hapus filter
           </Button>
@@ -193,10 +214,7 @@ export function RoomListView() {
           filtered ? (
             <Button
               variant="outline"
-              onClick={() => {
-                setDraft("");
-                update({ q: null, status: null, page: null });
-              }}
+              onClick={clearFilters}
             >
               Hapus filter
             </Button>
@@ -255,16 +273,20 @@ function roomColumns(showProperty: boolean) {
 // Tampilan HP: satu kartu per kamar (design.md 6.6). Tanpa gulir samping.
 function RoomCard({ room, showProperty }: { room: RoomRow; showProperty: boolean }) {
   const label = ROOM_STATUS_LABELS[room.status];
-  const detail = [showProperty ? room.propertyName : null, room.roomType || null]
-    .filter(Boolean)
-    .join(" · ");
+  const type = room.roomType || null;
   return (
     <Link href={`/kamar/${room.id}`} className="flex min-h-[72px] flex-col justify-center gap-1">
       <div className="flex items-center justify-between gap-3">
         <span className="font-medium text-primary">{room.code}</span>
         <StatusBadge label={label.label} tone={label.tone} />
       </div>
-      {detail ? <p className="text-sm text-muted-foreground">{detail}</p> : null}
+      {showProperty || type ? (
+        <p className="text-sm text-muted-foreground">
+          {showProperty ? <span className="font-medium text-foreground">{room.propertyName}</span> : null}
+          {showProperty && type ? " · " : null}
+          {type}
+        </p>
+      ) : null}
       <p className="num text-sm font-medium">
         {formatRupiah(room.baseRentAmount)}
         <span className="font-normal text-muted-foreground"> / bulan</span>
