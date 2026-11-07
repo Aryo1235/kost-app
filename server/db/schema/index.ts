@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   check,
   index,
@@ -10,7 +11,14 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { AUDIT_ACTIONS, ROLES } from "@/shared/enums";
+import {
+  AUDIT_ACTIONS,
+  ELECTRICITY_PATTERNS,
+  type ElectricityPattern,
+  ROLES,
+  ROOM_STATUSES,
+  type RoomStatus,
+} from "@/shared/enums";
 
 // Daftar nilai untuk CHECK. Diambil dari shared/enums.ts supaya satu sumber.
 const inList = (values: readonly string[]) =>
@@ -98,9 +106,53 @@ export const properties = pgTable(
       .references(() => organizations.id),
     name: text("name").notNull(),
     address: text("address").notNull(),
+    notes: text("notes"),
+    isActive: boolean("is_active").notNull().default(true),
+    hasFacilities: boolean("has_facilities").notNull().default(false),
+    electricityManaged: boolean("electricity_managed").notNull().default(false),
+    electricityPattern: text("electricity_pattern")
+      .$type<ElectricityPattern>()
+      .notNull()
+      .default("A"),
     createdAt: createdAt(),
   },
-  (t) => [index("properties_organization_id_idx").on(t.organizationId)],
+  (t) => [
+    index("properties_organization_id_idx").on(t.organizationId),
+    check(
+      "properties_electricity_pattern_check",
+      sql`${t.electricityPattern} in (${inList(ELECTRICITY_PATTERNS)})`,
+    ),
+  ],
+);
+
+// Kamar. Kode unik per properti, tidak peka huruf besar-kecil, dan bisa dipakai ulang setelah dihapus (soft delete).
+export const rooms = pgTable(
+  "rooms",
+  {
+    id: id(),
+    organizationId: integer("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    propertyId: integer("property_id")
+      .notNull()
+      .references(() => properties.id),
+    code: text("code").notNull(),
+    roomType: text("room_type"),
+    baseRentAmount: bigint("base_rent_amount", { mode: "number" }).notNull(),
+    facilities: text("facilities"),
+    status: text("status").$type<RoomStatus>().notNull().default("AVAILABLE"),
+    notes: text("notes"),
+    createdAt: createdAt(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("rooms_property_code_key")
+      .on(t.propertyId, sql`lower(${t.code})`)
+      .where(sql`deleted_at is null`),
+    index("rooms_org_property_status_idx").on(t.organizationId, t.propertyId, t.status),
+    check("rooms_status_check", sql`${t.status} in (${inList(ROOM_STATUSES)})`),
+    check("rooms_base_rent_check", sql`${t.baseRentAmount} >= 0`),
+  ],
 );
 
 export const propertyAccess = pgTable(

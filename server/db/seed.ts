@@ -42,14 +42,23 @@ export async function seedDevData(): Promise<SeedSummary> {
   const melati = await services.property.create(scopeA, {
     name: "Melati",
     address: "Jl. Contoh No. 1, Jakarta Selatan",
+    hasFacilities: true,
+    electricityManaged: true,
+    electricityPattern: "C",
   });
   await services.property.create(scopeA, {
     name: "Mawar",
     address: "Jl. Contoh No. 2, Jakarta Selatan",
+    hasFacilities: false,
+    electricityManaged: false,
+    electricityPattern: "A",
   });
   await services.property.create(scopeB, {
     name: "Anggrek",
     address: "Jl. Contoh No. 3, Bandung",
+    hasFacilities: false,
+    electricityManaged: true,
+    electricityPattern: "B",
   });
 
   // Pengelola A hanya boleh melihat Melati. Kata sandi awalnya wajib diganti saat masuk pertama.
