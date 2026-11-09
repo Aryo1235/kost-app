@@ -6,7 +6,7 @@ Aplikasi web SaaS untuk pemilik kost (banyak owner, tiap owner banyak properti):
 
 - `docs/PRD.md`: apa yang dibangun, aturan bisnis (BR-01 sampai BR-18), model data, kebutuhan (FR-\*).
 - `docs/TECH-SPEC.md`: stack, arsitektur, isolasi data, struktur folder, milestone. **Baca bagian 2 dan 3 sebelum menulis kode.**
-- `docs/design.md`: tampilan dan komponen (dibuat sebelum M1). Jangan memilih warna atau gaya sendiri.
+- `docs/design.md`: tampilan dan komponen. Jangan memilih warna atau gaya sendiri.
 
 Jika PRD dan Tech Spec bertentangan: perilaku bisnis ikut PRD, hal teknis ikut Tech Spec. Item PRD berlabel **[TERBUKA]** memakai default di PRD bagian 13.
 
@@ -28,10 +28,9 @@ yarn db:migrate          # jalankan migrasi
 yarn db:seed             # data contoh, hanya dev
 yarn create-owner        # buat organisasi + akun owner (username, kata sandi)
 yarn reset-password <username>   # reset kata sandi, dipakai bila owner lupa sandi
-docker compose -f docker/compose.dev.yml up -d   # PostgreSQL
+docker compose up -d     # PostgreSQL (dari folder utama; berkas compose.yaml)
 ```
 
-Skrip yang belum ada dibuat di M0.
 
 ## Peta kode: frontend, backend, jembatan
 
@@ -82,6 +81,7 @@ Alur satu arah: controller → service → repository. Service melempar `NotFoun
 13. **Listrik** (PRD 7.8): penyewa yang membeli token atau membayar PLN sendiri = `TENANT_DIRECT`, tidak dicatat sama sekali. `TENANT_BILLED` hanya jika pemilik membayar PLN lalu menagihkannya.
 14. **Login hanya username dan kata sandi, tanpa email** (fase 1). Jangan menambahkan alur email, undangan, atau SMTP. Kata sandi tidak boleh masuk log, audit log, atau respons API, kecuali ditampilkan satu kali saat owner mereset akun pengelola.
 15. **Autentikasi dibangun sendiri** (TECH-SPEC 3.4). Jangan memasang pustaka autentikasi. Token sesi hanya disimpan sebagai hash, kata sandi di-hash dengan scrypt bawaan Node, dan dilarang menulis algoritma kripto sendiri di luar modul `crypto`.
+16. jangan membuat baris comment yang berlebihan jika tidak di perlukan.
 
 ## Konvensi
 
@@ -113,4 +113,4 @@ Alur satu arah: controller → service → repository. Service melempar `NotFoun
 
 ## Status
 
-Milestone terakhir selesai: **M1** (properti dan kamar). Kode dan tes selesai (155 tes lolos, lint dan typecheck lolos), uji HTTP dan peramban, dan uji pemilik di HP dan desktop sudah dilakukan. Sudah digabung ke `main`. Milestone berikutnya: **M2** (tenant), menunggu rencana dan persetujuan. M0 selesai (tinjauan keamanan dan uji login sudah dilakukan). Perbarui baris ini di akhir tiap milestone.
+Selesai dan sudah di `main`: **M0** (fondasi) dan **M1** (properti dan kamar). Berikutnya: **M2** (tenant), menunggu rencana dan persetujuan. Perbarui baris ini di akhir tiap milestone.

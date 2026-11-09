@@ -394,7 +394,8 @@ kost-app/
 ├─ AGENTS.md  CLAUDE.md  README.md
 ├─ Dockerfile  eslint.config.mjs  next.config.ts  tsconfig.json  package.json
 ├─ docs/                          # PRD.md, TECH-SPEC.md, design.md (nanti)
-├─ docker/                        # compose.dev.yml, compose.prod.yml, Caddyfile
+├─ compose.yaml                   # PostgreSQL dev (nama bawaan, `docker compose up -d`)
+├─ docker/                        # init/ (SQL awal), compose.prod.yml, Caddyfile
 ├─ drizzle/                       # migrasi SQL (hasil generate dan kustom)
 ├─ scripts/                       # create-owner.ts, backup.sh, restore.sh
 │
@@ -499,7 +500,7 @@ Berkas `.env` tidak masuk git. Variabel server dibaca hanya lewat `server/env.ts
 
 ### 11.2 Lokal (sekarang)
 
-`docker compose -f docker/compose.dev.yml up -d` menjalankan PostgreSQL (hanya terbuka di `127.0.0.1`). Lalu `yarn db:migrate`, `yarn db:seed`, `yarn dev`. PostgreSQL yang terpasang langsung di komputer juga bisa.
+`docker compose up -d` (dari folder utama) menjalankan PostgreSQL (hanya terbuka di `127.0.0.1`). Lalu `yarn db:migrate`, `yarn db:seed`, `yarn dev`. PostgreSQL yang terpasang langsung di komputer juga bisa.
 
 ### 11.3 CI
 
@@ -549,7 +550,7 @@ Urutan dan kriteria selesai mengikuti PRD bagian 12. **Urutan eksekusi: M0, M1, 
 Pekerjaan, berurutan:
 
 1. **Kerangka proyek**: `create-next-app` (TypeScript, Tailwind, App Router) dengan Yarn Berry, `.nvmrc`, shadcn/ui, ESLint dengan aturan batas BE/FE (2.2), Vitest, Playwright, `lib/env.ts` dan `server/env.ts`, alias `@/*`, skrip `package.json` (lihat `AGENTS.md`), `Dockerfile`, `.dockerignore`, `.github/workflows/dev.yml`, `dependabot.yml`.
-2. **Database lokal**: `compose.dev.yml`, konfigurasi drizzle-kit, database tes.
+2. **Database lokal**: `compose.yaml`, konfigurasi drizzle-kit, database tes.
 3. **Skema dan migrasi dasar**: `organizations`, `users`, `sessions`, `login_attempts`, `properties` (minimal), `property_access`, `audit_logs` (+ trigger penolak ubah dan hapus).
 4. **Fondasi backend**: `BaseRepository` (3.1), pembuat `scope` dan `ctx`, galat domain dan `error-mapper`, `logger` dengan `requestId`.
 5. **Autentikasi buatan sendiri** (3.4): hash kata sandi (scrypt), sesi dan cookie, login dengan pembatasan percobaan, logout, ubah kata sandi sendiri, wajib ganti sandi awal (`must_change_password`), pemeriksaan `Origin`, owner membuat dan mereset akun pengelola, penonaktifan pengguna (sesi dicabut), skrip `create-owner` dan `reset-password`. Tes keamanan autentikasi (3.8) ditulis bersamaan.

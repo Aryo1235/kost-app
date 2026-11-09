@@ -1,4 +1,9 @@
 # PostgreSQL untuk pengembangan dan tes lokal. Hanya terbuka di 127.0.0.1.
+# Jalankan dari folder utama proyek: docker compose up -d
+# name dikunci supaya container (docker-db-1) dan volume (docker_kost-db-dev) tetap sama
+# walau berkas ini dipindah. Tanpa ini, nama proyek mengikuti nama folder dan volume baru yang kosong terbuat.
+name: docker
+
 services:
   db:
     image: postgres:17
@@ -11,7 +16,7 @@ services:
     volumes:
       - kost-db-dev:/var/lib/postgresql/data
       # Membuat kost_test saat volume pertama kali dibuat.
-      - ./init:/docker-entrypoint-initdb.d:ro
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kost -d kost_dev"]
       interval: 5s
