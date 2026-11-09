@@ -637,7 +637,7 @@ Aturan bagian:
 - Judul "Ubah kamar A-07", keterangan nama properti.
 - Tombol "Batal" (garis, kembali ke detail) dan "Simpan perubahan" (utama, satu-satunya di halaman).
 - Setelah disimpan, kembali ke halaman detail dengan data terbaru.
-- Breadcrumb `Beranda / Kamar / A-07 / Ubah`.
+- Breadcrumb tetap `Beranda / Kamar`, seperti halaman detail.
 
 **Tambah kamar**: setelah disimpan, pindah ke halaman detail kamar baru.
 

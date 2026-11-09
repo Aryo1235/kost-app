@@ -101,12 +101,11 @@ Mulai dengan rencana singkat dan tunggu persetujuan saya.
 
 Lingkup:
 - Lengkapi tabel properties (has_facilities, electricity_managed, electricity_pattern), buat tabel
-  rooms dan kerangka tabel meters (hanya tabel dan relasi rooms.meter_id; antarmuka meteran
-  menyusul di M4).
+  rooms. Tabel meters dan rooms.meter_id ditunda ke M4 (keputusan pemilik produk).
 - Properti (FR-PRO-01 sampai 05): owner membuat, mengubah, menonaktifkan; pertanyaan pengaturan
   saat membuat (ada fasum, listrik dikelola aplikasi, pola listrik) dengan nilai awal dari
-  Lampiran C. Pola hanya disimpan, belum dipakai. Pemilih properti di header, owner punya "Semua
-  properti". Menu mengikuti pengaturan properti (BR-16).
+  Lampiran C. Pola hanya disimpan, belum dipakai. Cakupan properti lewat filter di halaman (FR-PRO-02),
+  bukan pemilih global. Menu mengikuti pengaturan properti (BR-16).
 - Kamar (FR-ROOM-01, 02, 04, 06): buat, ubah, daftar dengan paginasi, pencarian, dan filter di
   server. Tanpa kolom tenant, status bayar, dan pemilihan meteran dulu (menyusul M2, M3, M4).
   Aturan yang butuh tenant (FR-ROOM-04 dan 06) cukup disiapkan titik panggilnya, diselesaikan di M2.

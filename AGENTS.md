@@ -22,7 +22,7 @@ yarn build && yarn start
 yarn lint                # eslint (termasuk batas frontend/backend)
 yarn typecheck           # tsc --noEmit
 yarn test                # vitest run (butuh PostgreSQL lokal)
-yarn test:e2e            # playwright
+yarn test:e2e            # playwright (belum terpasang; direncanakan setelah M2)
 yarn db:generate         # buat migrasi dari perubahan skema
 yarn db:migrate          # jalankan migrasi
 yarn db:seed             # data contoh, hanya dev
