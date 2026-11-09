@@ -245,8 +245,8 @@ Tanpa pustaka autentikasi (tanpa Better Auth, Auth.js, atau sejenisnya). Dibuat 
 
 ### 3.6 NIK, foto, dan data pribadi
 
-- **NIK**: terenkripsi AES-256-GCM di kolom `nik_encrypted`, plus `nik_last4` untuk tampilan tersamar. Kunci dari env `NIK_ENCRYPTION_KEY`. NIK penuh hanya dibuka lewat aksi eksplisit yang menulis `VIEW_SENSITIVE` ke audit log (FR-AUD-07). NIK tidak ada di log, daftar, maupun ekspor.
-- **Kunci enkripsi hilang berarti NIK tidak bisa dibaca lagi.** Simpan di tempat terpisah dari cadangan database.
+- **NIK**: disimpan apa adanya di kolom `nik` **[PUTUSAN]** (tanpa enkripsi kolom di fase 1), dijaga oleh kontrol akses. Penyamaran (4 digit terakhir) dilakukan di service sehingga daftar tidak pernah menerima NIK penuh. NIK penuh hanya dibuka lewat aksi eksplisit yang menulis `VIEW_SENSITIVE` ke audit log (FR-AUD-07). NIK tidak ada di log, daftar, maupun ekspor.
+- **Konsekuensi:** NIK ikut terbaca di cadangan `pg_dump`, jadi cadangan harus diperlakukan sebagai data sensitif (akses terbatas, disimpan privat). Enkripsi kolom bisa ditambahkan kemudian lewat migrasi baru.
 - **Foto**: penyimpanan privat (bagian 7). EXIF dibuang saat unggah.
 - Nomor WhatsApp dinormalisasi ke format `62...` sebelum disimpan.
 
@@ -266,7 +266,7 @@ Tanpa pustaka autentikasi (tanpa Better Auth, Auth.js, atau sejenisnya). Dibuat 
 | Insert aman        | `insert` dengan `organization_id` palsu di input tetap tersimpan di organisasi milik `scope`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Audit log          | `UPDATE` dan `DELETE` pada `audit_logs` ditolak trigger                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | File               | Pengguna organisasi A meminta file organisasi B dan ditolak. Tautan kedaluwarsa ditolak                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| NIK                | Enkripsi lalu dekripsi menghasilkan nilai asli. Nilai di database bukan teks biasa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| NIK                | Daftar dan respons umum hanya berisi 4 digit terakhir. NIK penuh hanya di detail dan membukanya menulis `VIEW_SENSITIVE`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Batas BE/FE        | `yarn lint` lolos (aturan 2.2), dan tidak ada impor runtime dari `server/` di frontend                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ### 3.9 Pengamanan umum
@@ -490,7 +490,6 @@ Tes aturan bisnis wajib untuk BR-01 sampai BR-18, terutama **BR-01, BR-04, BR-09
 | ------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`                  | Koneksi PostgreSQL (aplikasi, migrasi, seed)                                                       |
 | `APP_ORIGIN`                    | Alamat resmi aplikasi (misalnya `https://kost.contoh.id`), dipakai pemeriksaan `Origin` dan cookie |
-| `NIK_ENCRYPTION_KEY`            | Kunci 32 byte (base64) untuk NIK                                                                   |
 | `FILE_SIGNING_SECRET`           | Tanda tangan tautan file                                                                           |
 | `STORAGE_DRIVER`, `STORAGE_DIR` | Penyimpanan file                                                                                   |
 | `NEXT_PUBLIC_APP_URL`           | Satu-satunya variabel yang boleh dibaca frontend (`lib/env.ts`)                                    |
@@ -519,7 +518,7 @@ Cadangan adalah **tugas infrastruktur di server**, bukan fitur aplikasi, jadi ti
 
 - `scripts/backup.sh` lewat crontab server: `pg_dump` harian terkompresi, ditambah salinan folder `STORAGE_DIR`.
 - Salin ke **lokasi lain di luar VPS** (misalnya objek storage via `rclone`). Retensi awal: 14 harian dan 8 mingguan.
-- `NIK_ENCRYPTION_KEY` dan `.env` disimpan terpisah dari cadangan data.
+- `.env` disimpan terpisah dari cadangan data. Cadangan database memuat NIK apa adanya, jadi simpan di lokasi privat dengan akses terbatas.
 - **Uji pemulihan sebelum rilis** (`scripts/restore.sh` ke database kosong).
 - Lokasi server dan UU PDP: VPS di Indonesia memudahkan, tetapi kewajiban hukumnya belum dicek **[TERBUKA]**.
 
@@ -533,7 +532,7 @@ Urutan dan kriteria selesai mengikuti PRD bagian 12. **Urutan eksekusi: M0, M1, 
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | M0    | Bagian 13 di bawah                                                                                                                                                                      |
 | M1    | `PropertyRepository`, `RoomRepository`, `MeterRepository` (daftar saja). Pengaturan properti (`has_facilities`, `electricity_managed`, `electricity_pattern`) menggerakkan menu (BR-16) |
-| M2    | Enkripsi NIK, unggah foto tenant, riwayat harga sewa (BR-06), indeks unik BR-01                                                                                                         |
+| M2    | Penyamaran NIK dan audit `VIEW_SENSITIVE`, unggah foto tenant, riwayat harga sewa (BR-06), indeks unik BR-01                                                                                                         |
 | M3    | `InvoiceService.generateDue` idempoten (5.2), pembuat tautan `wa.me` dan templat, `reminder_logs`, tenant keluar dalam satu transaksi (BR-04)                                           |
 | M4    | Meteran dan bacaan, rumus listrik di `electricity.rules.ts`, baris `ELECTRICITY` di tagihan. `TENANT_DIRECT` tidak dicatat sama sekali (PRD 7.8)                                        |
 | M5    | Unggah foto sebelum dan sesudah, kondisi asset mengikuti status tiket                                                                                                                   |

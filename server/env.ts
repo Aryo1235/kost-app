@@ -2,7 +2,6 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 // Variabel khusus server. Hanya dibaca dari sini (TECH-SPEC 11.1).
-// NIK_ENCRYPTION_KEY menyusul di M2, saat kolom NIK dibuat.
 export const env = createEnv({
   server: {
     DATABASE_URL: z.url(),

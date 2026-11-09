@@ -614,7 +614,7 @@ Prinsip antarmuka:
 - Aplikasi menyimpan **foto penyewa dan NIK**, termasuk data pribadi **[PUTUSAN]**.
 - Isolasi data antar owner dan antar properti diterapkan di lapisan server (setiap query data terikat ke organisasi dan properti yang diizinkan), bukan hanya di antarmuka. Fase 1 tidak memakai row-level security **[PUTUSAN]**.
 - Foto dan dokumen disimpan di penyimpanan **privat**. Akses lewat tautan bertanda tangan yang kedaluwarsa singkat. Tidak ada URL publik permanen.
-- NIK disimpan terenkripsi atau dengan kontrol akses ketat, disamarkan di daftar, dan tidak ada di ekspor.
+- NIK disimpan dengan kontrol akses ketat tanpa enkripsi kolom **[PUTUSAN]**, disamarkan di daftar, dan tidak ada di ekspor.
 - Seluruh lalu lintas memakai HTTPS. Kata sandi tidak disimpan sebagai teks biasa.
 - Pembukaan data sensitif masuk audit log (FR-AUD-07).
 - Perlu dicek kesesuaiannya dengan UU Pelindungan Data Pribadi sebelum rilis, termasuk persetujuan tenant atas pengumpulan data dan kebijakan retensi.

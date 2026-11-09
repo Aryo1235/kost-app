@@ -74,7 +74,7 @@ Alur satu arah: controller → service → repository. Service melempar `NotFoun
 6. **Tanggal** zona Asia/Jakarta. Di backend pakai `todayWIB()`, bukan `new Date()`.
 7. **Tanpa cron atau job latar** (BR-18). Tindakan yang bergantung waktu dipicu saat halaman dibuka atau lewat tombol, dan harus idempoten.
 8. **File privat.** Simpan di luar `public`, sajikan lewat `/api/files` dengan tautan bertanda tangan, hapus EXIF. Tidak ada URL publik permanen.
-9. **NIK** terenkripsi, tersamar di daftar, tidak ada di log dan ekspor. Membuka NIK penuh menulis `VIEW_SENSITIVE`.
+9. **NIK** disimpan apa adanya di kolom `nik` (tanpa enkripsi kolom, putusan fase 1), dijaga kontrol akses: tersamar di daftar, tidak ada di log dan ekspor. Membuka NIK penuh menulis `VIEW_SENSITIVE`.
 10. **Tagihan dan pembayaran tidak dihapus permanen** (BR-09). Data lain memakai soft delete.
 11. **Tanpa cache lintas pengguna** untuk data tenant. Jika perlu cache, kuncinya memuat `organization_id`.
 12. **Migrasi** hanya lewat drizzle-kit dan di-commit. Migrasi yang sudah dijalankan tidak diedit.

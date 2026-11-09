@@ -137,9 +137,10 @@ Mulai dengan rencana singkat dan tunggu persetujuan saya.
 Lingkup:
 - Tenant FR-TEN-01 sampai 07 dan 09 sampai 13. FR-TEN-08 dibagi dua: di M2 hanya baris pertama
   rent_price_history; pembuatan tagihan pertama dikerjakan di M3 (jangan buat tabel invoice).
-- NIK: validasi 16 digit, simpan terenkripsi AES-256-GCM (kolom nik_encrypted ditambah nik_last4),
-  kunci dari env. Daftar hanya menampilkan 4 digit terakhir; NIK penuh hanya di detail dan
-  membukanya menulis audit VIEW_SENSITIVE. NIK tidak boleh muncul di log.
+- NIK: validasi 16 digit, simpan apa adanya di kolom nik (tanpa enkripsi, putusan fase 1; tidak ada
+  kunci env). Penyamaran dilakukan di service: daftar hanya menampilkan 4 digit terakhir; NIK penuh
+  hanya di detail dan membukanya menulis audit VIEW_SENSITIVE. NIK tidak boleh muncul di log dan
+  ekspor.
 - Foto tenant lewat /api/upload (kompres di klien, EXIF dibuang di server) dan ditampilkan lewat
   /api/files dengan tautan bertanda tangan.
 - Nomor WhatsApp dinormalisasi ke format 62.
@@ -154,8 +155,8 @@ Lingkup:
 - Kendaraan dan barang elektronik pribadi. Detail kamar menampilkan tenant aktif.
 - Seed: tenant dengan berbagai penanggung listrik di properti organisasi A.
 
-Tes wajib: BR-01, BR-06 (riwayat harga), enkripsi NIK (nilai di database bukan teks biasa),
-VIEW_SENSITIVE tercatat, normalisasi telepon, isolasi antar organisasi, akses per properti.
+Tes wajib: BR-01, BR-06 (riwayat harga), penyamaran NIK di daftar dan respons (NIK penuh hanya di
+detail), VIEW_SENSITIVE tercatat, normalisasi telepon, isolasi antar organisasi, akses per properti.
 
 Di akhir: jalankan yarn lint, yarn typecheck, dan yarn test. Periksa kriteria "Selesai jika" M2
 (PRD bagian 12) satu per satu dan laporkan lolos atau tidak beserta buktinya. Catat kekurangan PRD
